@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/round_corner_bg"
+    android:orientation="vertical"
+    android:padding="5dp"
+    android:paddingEnd="15dp"
+    tools:showIn="@layout/activity_login">
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/email_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="15"
+        android:hint="@string/email_hint"
+        android:inputType="textEmailAddress"
+        android:textSize="15sp"
+        app:met_floatingLabel="highlight"
+        app:met_iconLeft="@drawable/ic_email_black_36dp"
+        app:met_iconPadding="4dp" />
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/password_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="15"
+        android:hint="@string/password_hint"
+        android:inputType="textPassword"
+        android:textSize="15sp"
+        app:met_clearButton="true"
+        app:met_floatingLabel="highlight"
+        app:met_iconLeft="@drawable/ic_vpn_key_black_36dp"
+        app:met_iconPadding="4dp" />
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/repeat_password_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="15"
+        android:hint="@string/repeat_password_hint"
+        android:inputType="textPassword"
+        android:textSize="15sp"
+        android:visibility="gone"
+        app:met_clearButton="true"
+        app:met_floatingLabel="highlight"
+        app:met_iconLeft="@drawable/ic_vpn_key_black_36dp"
+        app:met_iconPadding="4dp" />
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/username_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="15"
+        android:hint="@string/username_hint"
+        android:inputType="textPersonName"
+        android:textSize="15sp"
+        android:visibility="gone"
+        app:met_floatingLabel="highlight"
+        app:met_iconLeft="@drawable/ic_account_circle_black_36dp"
+        app:met_iconPadding="4dp" />
+
+</LinearLayout>

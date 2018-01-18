@@ -1,0 +1,79 @@
+<resources>
+    <string name="app_name">bloggy</string>
+    <string name="login">bloggy - Login</string>
+    <string name="register">bloggy - Register</string>
+    <string name="login_title">Welcome to Bloggy</string>
+    <string name="login_title_sign_up">Register</string>
+    <string name="login_title_forget_password">Reset password</string>
+    <string name="email_invalid_message">Email address invalid</string>
+    <string name="email_in_use_message">Email already registered</string>
+    <string name="username_in_use_message">Username already in use</string>
+    <string name="password_invalid_message">Password invalid</string>
+    <string name="repeat_password_invalid_message">Not same with the password</string>
+    <string name="username_invalid_message">Username invalid</string>
+    <string name="input_fields_invalid_message">Something wrong in input fields</string>
+    <string name="sign_up">Sign up</string>
+    <string name="log_in">Log in</string>
+    <string name="email_hint">Email:</string>
+    <string name="password_hint">Password:</string>
+    <string name="forget_password">Forget password?</string>
+    <string name="forget_password_back_to_login">Back to login</string>
+    <string name="repeat_password_hint">Repeat password:</string>
+    <string name="username_hint">Username:</string>
+    <string name="edit_user_info">Edit Info</string>
+    <string name="follow_user_info">Follow</string>
+    <string name="unfollow_user_info">Unfollow</string>
+
+    <string name="on_back_press_hint">Press back again to exit.</string>
+
+    <string name="progress_dialog_login_title">Logging in</string>
+    <string name="progress_dialog_register_title">Signing up</string>
+    <string name="progress_dialog_user_info_title">Following/Unfollowing</string>
+    <string name="progress_dialog_user_info_title1">User info</string>
+    <string name="progress_dialog_content">please wait...</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="action_share">Share</string>
+    <string name="action_log_out">Log out</string>
+    <string name="title_activity_login">Sign in</string>
+
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="share">Share</string>
+    <string name="favorite">Favorite</string>
+    <string name="unfavorite">Unfavorite</string>
+    <string name="copy">Copy</string>
+    <string name="delete_confirm">Delete Confirm</string>
+    <string name="delete_confirm_content">Are you sure to delete?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="post_deleted">post deleted</string>
+    <string name="comment_deleted">comment deleted</string>
+    <string name="markdown">Markdown</string>
+    <string name="plain_text">Plain Text</string>
+    <string name="text_edit_detected">Text edit detected. </string>
+    <string name="new_post">New Post</string>
+    <string name="create_new_post">Create new post</string>
+    <string name="import_from_file">Import From File (*.txt/*.md)</string>
+    <string name="comment">Comment</string>
+    <string name="add_comment">Add Comment:</string>
+    <string name="edit_post">Edit Post</string>
+    <string name="preview_markdown">Preview Markdown</string>
+    <string name="post">Post</string>
+    <string name="all_post">All Post</string>
+    <string name="timeline">TimeLine</string>
+    <string name="draft">Draft</string>
+    <string name="save_as_draft">Save As Draft</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="default_username_header">Anonymous User</string>
+    <string name="default_email_header">example@gmail.com</string>
+    <string name="title_activity_post">PostActivity</string>
+    <string name="title_activity_edit">EditActivity</string>
+</resources>

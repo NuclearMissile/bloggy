@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group
+        android:id="@+id/first_group"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_all"
+            android:checked="true"
+            android:icon="@drawable/message_black"
+            android:title="@string/all_post" />
+        <item
+            android:id="@+id/nav_time_line"
+            android:icon="@drawable/timeline"
+            android:title="@string/timeline" />
+        <item
+            android:id="@+id/nav_favorite"
+            android:icon="@drawable/favorite"
+            android:title="@string/favorite" />
+
+        <item
+            android:id="@+id/nav_draft"
+            android:icon="@drawable/draft"
+            android:title="@string/draft" />
+    </group>
+
+    <group android:id="@+id/second_group">
+        <item
+            android:id="@+id/nav_share"
+            android:icon="@drawable/settings"
+            android:title="@string/action_settings" />
+    </group>
+
+</menu>

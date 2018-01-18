@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="nuclear.com.bloggy.UI.Activity.PostActivity">
+    <item
+        android:id="@+id/favorite_post"
+        android:checkable="true"
+        android:title="@string/favorite"
+        android:visible="false"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/share_post"
+        android:title="@string/share"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/edit_post"
+        android:title="@string/edit"
+        android:visible="false"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/delete_post"
+        android:title="@string/delete"
+        android:visible="false"
+        app:showAsAction="never" />
+</menu>
