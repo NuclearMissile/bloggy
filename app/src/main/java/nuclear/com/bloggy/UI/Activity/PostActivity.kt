@@ -281,6 +281,7 @@ class PostMarkDownFragment : BaseRVFragment() {
                     LogUtil.e(this, it.message)
                     ToastUtil.showLongToast(it.message)
                     it.printStackTrace()
+                    // jh
                 })
     }
 
