@@ -1,17 +1,14 @@
-package nuclear.com.bloggy.UI.Activity
+package nuclear.com.bloggy.UI.Widget
 
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
-import me.drakeet.multitype.Items
-import me.drakeet.support.about.AbsAboutActivity
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity
 import nuclear.com.swipeback.SwipeBackLayout
 import nuclear.com.swipeback.Utils
 import nuclear.com.swipeback.activity.ISwipeBackActivity
 import nuclear.com.swipeback.activity.SwipeBackActivityHelper
 
-class AboutActivity : AbsAboutActivity(), ISwipeBackActivity {
+abstract class SwipeBackRxActivity : RxAppCompatActivity(), ISwipeBackActivity {
     private lateinit var mHelper: SwipeBackActivityHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,13 +34,5 @@ class AboutActivity : AbsAboutActivity(), ISwipeBackActivity {
     override fun scrollToFinishActivity() {
         Utils.convertActivityToTranslucent(this)
         swipeBackLayout.scrollToFinishActivity()
-    }
-
-    override fun onItemsCreated(items: Items) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onCreateHeader(icon: ImageView, slogan: TextView, version: TextView) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

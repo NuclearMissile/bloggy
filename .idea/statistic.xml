@@ -10,7 +10,7 @@
         <option value="$PROJECT_DIR$/app/objectbox-models" />
         <option value="$PROJECT_DIR$/build" />
         <option value="$PROJECT_DIR$/gradle" />
-        <option value="$PROJECT_DIR$/swipeback" />
+        <option value="$PROJECT_DIR$/swipeback/build" />
       </list>
     </option>
   </component>

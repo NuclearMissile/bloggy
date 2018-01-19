@@ -7,11 +7,10 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-
 class ServiceFactory private constructor() {
     private val mDefClient = OkHttpUtil.genOkHttpClient(
             OkHttpUtil.INTERCEPTOR_LOGGING,
-            OkHttpUtil.INTERCEPTOR_AUTO_CACHE,
+            /* OkHttpUtil.INTERCEPTOR_AUTO_CACHE,*/
             OkHttpUtil.INTERCEPTOR_JSON_HEADER)
 
     fun <S> createService(serviceClass: Class<S>, baseUrl: String,

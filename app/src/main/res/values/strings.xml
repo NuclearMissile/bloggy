@@ -56,7 +56,8 @@
     <string name="comment_deleted">comment deleted</string>
     <string name="markdown">Markdown</string>
     <string name="plain_text">Plain Text</string>
-    <string name="text_edit_detected">Text edit detected. </string>
+    <string name="edit_detected">Edit Detected</string>
+    <string name="text_edit_detected">Text Edit Detected</string>
     <string name="new_post">New Post</string>
     <string name="create_new_post">Create new post</string>
     <string name="import_from_file">Import From File (*.txt/*.md)</string>
@@ -68,10 +69,11 @@
     <string name="all_post">All Post</string>
     <string name="timeline">TimeLine</string>
     <string name="draft">Draft</string>
-    <string name="save_as_draft">Save As Draft</string>
+    <string name="new_draft">New Draft</string>
+    <string name="exit_without_saving">Exit Without Saving</string>
+    <string name="upload_post">Upload Post</string>
+    <string name="exit">Exit</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="default_username_header">Anonymous User</string>
     <string name="default_email_header">example@gmail.com</string>
     <string name="title_activity_post">PostActivity</string>

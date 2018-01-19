@@ -25,15 +25,15 @@ import nuclear.com.bloggy.UI.CommentViewBinder
 import nuclear.com.bloggy.UI.Fragment.BaseRVFragment
 import nuclear.com.bloggy.UI.PostContentViewBinder
 import nuclear.com.bloggy.UI.UserViewBinder
+import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
 import nuclear.com.bloggy.Util.LogUtil
 import nuclear.com.bloggy.Util.ShareUtil
 import nuclear.com.bloggy.Util.ToastUtil
 import nuclear.com.bloggy.Util.defaultSchedulers
-import nuclear.com.swipeback.activity.SwipeBackActivity
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
-class PostActivity : SwipeBackActivity() {
+class PostActivity : SwipeBackRxActivity() {
     private lateinit var mPost: Post
     private var mFavoritePost: FavoritePost? = null
         get() = BaseApplication.favoritePostBox.query()

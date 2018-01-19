@@ -46,7 +46,9 @@
             android:theme="@style/AppTheme.NoActionBar1"
             android:windowSoftInputMode="stateHidden|adjustResize"
             tools:ignore="InnerclassSeparator" />
-        <activity android:name=".UI.Activity.AboutActivity" />
+        <activity
+            android:name=".UI.Activity.AboutActivity"
+            tools:ignore="InnerclassSeparator" />
     </application>
 
 </manifest>

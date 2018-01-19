@@ -2,9 +2,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="nuclear.com.bloggy.UI.Activity.EditActivity">
+
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/new_post_edit"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="@string/new_post"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/edit_post_edit"
+        android:orderInCategory="100"
+        android:title="@string/edit_post"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/new_draft_edit"
+        android:orderInCategory="100"
+        android:title="@string/new_draft"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/exit_edit"
+        android:orderInCategory="100"
+        android:title="@string/exit"
         app:showAsAction="never" />
 </menu>

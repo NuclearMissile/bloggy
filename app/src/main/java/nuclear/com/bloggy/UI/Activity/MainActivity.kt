@@ -154,6 +154,8 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
                     .into(avatarImageView)
             usernameTextView.text = resources.getString(R.string.default_username_header)
             emailTextView.text = resources.getString(R.string.default_email_header)
+            nav_view.setCheckedItem(R.id.nav_all)
+            onNavigationItemSelected(nav_view.menu.findItem(R.id.nav_all))
         } else {
             Glide.with(this)
                     .load(UserManager.getAvatarUrl(128))

@@ -22,3 +22,5 @@ data class RemoveDraftEvent(val draft: NewArticle)
 // data class AddFavoriteEvent(val favoritePost: FavoritePost)
 
 data class RemoveFavoriteEvent(val favoritePost: FavoritePost)
+
+// data class UserLogoutEvent(val msg: String = "")

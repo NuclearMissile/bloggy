@@ -27,15 +27,12 @@ import nuclear.com.bloggy.UI.Fragment.BaseRVFragment
 import nuclear.com.bloggy.UI.Fragment.IPostFragment
 import nuclear.com.bloggy.UI.PostViewBinder
 import nuclear.com.bloggy.UI.UserViewBinder
-import nuclear.com.bloggy.Util.GlideOptions
-import nuclear.com.bloggy.Util.LogUtil
-import nuclear.com.bloggy.Util.ToastUtil
-import nuclear.com.bloggy.Util.defaultSchedulers
-import nuclear.com.swipeback.activity.SwipeBackActivity
+import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
+import nuclear.com.bloggy.Util.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
-class UserInfoActivity : SwipeBackActivity() {
+class UserInfoActivity : SwipeBackRxActivity() {
     private lateinit var mFollowState: FollowState
     private lateinit var mUser: User
     private var mId: Int = -1
@@ -66,11 +63,11 @@ class UserInfoActivity : SwipeBackActivity() {
 
     @SuppressLint("MissingSuperCall")
     override fun onResume() {
-        super.onResume()
         if (UserManager.isAnonymous)
             finish()
         else
             syncState()
+        super.onResume()
     }
 
     private fun initViewPager() {
@@ -184,23 +181,17 @@ class UserInfoActivity : SwipeBackActivity() {
                 })
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_user_info, menu)
+        menu.findItem(R.id.action_log_out).isVisible = UserManager.self!!.id == mId
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                return true
-            }
-            R.id.action_settings -> {
-
-            }
-            R.id.action_share -> {
-
-            }
+            android.R.id.home -> finish()
+            R.id.action_share ->
+                ShareUtil.shareText(this, "Share self link...", UserManager.self!!.userLink)
             R.id.action_log_out -> {
                 UserManager.logout()
                 finish()

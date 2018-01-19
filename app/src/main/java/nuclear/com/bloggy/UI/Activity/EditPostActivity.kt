@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.view.Menu
 import android.view.MenuItem
 import com.afollestad.materialdialogs.MaterialDialog
 import com.trello.rxlifecycle2.kotlin.bindToLifecycle
@@ -16,18 +17,20 @@ import nuclear.com.bloggy.*
 import nuclear.com.bloggy.Entity.NewArticle
 import nuclear.com.bloggy.Entity.Post
 import nuclear.com.bloggy.Network.ServiceFactory
+import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
 import nuclear.com.bloggy.Util.LogUtil
 import nuclear.com.bloggy.Util.ToastUtil
 import nuclear.com.bloggy.Util.defaultSchedulers
-import nuclear.com.swipeback.activity.SwipeBackActivity
 import org.greenrobot.eventbus.EventBus
 import ru.noties.markwon.Markwon
 
-class EditPostActivity : SwipeBackActivity() {
+class EditPostActivity : SwipeBackRxActivity() {
     private var mOriginPost: Post? = null
-    private var mCurrentText: String = ""
-    private var mOriginText: String = ""
+    private var mCurrentText = ""
+    private var mOriginText = ""
     private var plainFlag = true
+    private var editedFlag = false
+        get() = mCurrentText != mOriginText && !TextUtils.isEmpty(mCurrentText)
 
     companion object {
         fun tryStart(context: Context) {
@@ -90,6 +93,7 @@ class EditPostActivity : SwipeBackActivity() {
             override fun afterTextChanged(s: Editable) {
                 if (plainFlag)
                     mCurrentText = s.toString()
+                supportActionBar?.title = resources.getString(R.string.edit_post) + if (editedFlag) "*" else ""
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -102,7 +106,7 @@ class EditPostActivity : SwipeBackActivity() {
             plainFlag = false
             supportActionBar?.setTitle(R.string.preview_markdown)
             fab_edit.setImageResource(R.drawable.pencil)
-            Markwon.setMarkdown(body_et_edit, mCurrentText)
+            Markwon.setMarkdown(body_et_edit, mCurrentText.toString())
             body_et_edit.isFocusable = false
             body_et_edit.isFocusableInTouchMode = false
         } else {
@@ -116,21 +120,15 @@ class EditPostActivity : SwipeBackActivity() {
     }
 
     override fun onBackPressed() {
-        if (mOriginText != mCurrentText || (TextUtils.isEmpty(mOriginText) && !TextUtils.isEmpty(mCurrentText))) {
+        if (editedFlag) {
             MaterialDialog.Builder(this)
                     .title(R.string.text_edit_detected)
-                    .content(R.string.text_edit_detected)
-                    .positiveText(R.string.ok)
-                    .negativeText(R.string.cancel)
-                    .neutralText(R.string.save_as_draft)
+                    .content(R.string.edit_detected)
+                    .positiveText(R.string.upload_post)
+                    .negativeText(R.string.exit_without_saving)
                     .onPositive { _, _ -> uploadPost() }
                     .onNegative { _, _ -> finish() }
-                    .onNeutral { _, _ ->
-                        val draft = NewArticle(mCurrentText)
-                        BaseApplication.draftBox.put(draft)
-                        EventBus.getDefault().post(AddDraftEvent(draft))
-                        finish()
-                    }.show()
+                    .show()
         } else {
             super.onBackPressed()
         }
@@ -144,10 +142,10 @@ class EditPostActivity : SwipeBackActivity() {
                     else {
                         if (mOriginPost == null)
                             ServiceFactory.DEF_SERVICE
-                                    .newPost(NewArticle(mCurrentText), UserManager.getAuthHeaderByToken())
+                                    .newPost(NewArticle(mCurrentText.toString()), UserManager.getAuthHeaderByToken())
                         else
                             ServiceFactory.DEF_SERVICE
-                                    .editPost(NewArticle(mCurrentText), mOriginPost!!.id, UserManager.getAuthHeaderByToken())
+                                    .editPost(NewArticle(mCurrentText.toString()), mOriginPost!!.id, UserManager.getAuthHeaderByToken())
                     }
                 }
                 .retryWhen(UserManager::retryForToken)
@@ -170,13 +168,29 @@ class EditPostActivity : SwipeBackActivity() {
                 })
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.new_post_edit).isVisible = mOriginPost == null && editedFlag
+        menu.findItem(R.id.edit_post_edit).isVisible = mOriginPost != null && editedFlag
+        menu.findItem(R.id.new_draft_edit).isVisible = editedFlag
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_edit, menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_settings -> return true
-            android.R.id.home -> {
-                onBackPressed()
-                return true
+            android.R.id.home -> onBackPressed()
+            R.id.new_post_edit, R.id.edit_post -> uploadPost()
+            R.id.new_draft_edit -> {
+                val draft = NewArticle(mCurrentText)
+                BaseApplication.draftBox.put(draft)
+                EventBus.getDefault().post(AddDraftEvent(draft))
+                finish()
             }
+            R.id.exit_edit -> finish()
         }
         return super.onOptionsItemSelected(item)
     }

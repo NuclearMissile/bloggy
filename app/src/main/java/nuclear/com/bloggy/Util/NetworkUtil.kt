@@ -91,7 +91,7 @@ object NetworkUtil {
      */
     fun isConnected(context: Context): Boolean {
         val info = getActiveNetworkInfo(context)
-        return info != null && info.isConnected
+        return info?.isConnected ?: false
     }
 
     /**

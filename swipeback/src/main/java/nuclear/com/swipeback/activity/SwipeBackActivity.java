@@ -1,15 +1,14 @@
 package nuclear.com.swipeback.activity;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-
-import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import nuclear.com.swipeback.SwipeBackLayout;
 import nuclear.com.swipeback.Utils;
 
 
-public abstract class SwipeBackActivity extends RxAppCompatActivity implements ISwipeBackActivity {
+public abstract class SwipeBackActivity extends AppCompatActivity implements ISwipeBackActivity {
     private SwipeBackActivityHelper mHelper;
 
     @Override
