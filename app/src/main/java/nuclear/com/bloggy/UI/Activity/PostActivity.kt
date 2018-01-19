@@ -188,13 +188,9 @@ class PostActivity : SwipeBackActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        if (UserManager.isAdmin) {
-            menu.findItem(R.id.delete_post).isVisible = true
-        }
-        if (UserManager.isSelfById(mPost.authorId)) {
-            menu.findItem(R.id.edit_post).isVisible = true
-            menu.findItem(R.id.delete_post).isVisible = true
-        }
+        menu.findItem(R.id.delete_post).isVisible = UserManager.isAdmin
+        menu.findItem(R.id.edit_post).isVisible = UserManager.isSelfById(mPost.authorId)
+        menu.findItem(R.id.delete_post).isVisible = UserManager.isSelfById(mPost.authorId)
         menu.findItem(R.id.favorite_post).isVisible = !UserManager.isAnonymous
         menu.findItem(R.id.favorite_post).isChecked = mFavoritePost != null
         return super.onPrepareOptionsMenu(menu)
@@ -217,9 +213,13 @@ class PostActivity : SwipeBackActivity() {
             }
             R.id.favorite_post -> {
                 if (mFavoritePost == null) {
-                    BaseApplication.favoritePostBox.put(FavoritePost(mPost.id))
+                    val f = FavoritePost(mPost.id)
+                    BaseApplication.favoritePostBox.put(f)
+                    // EventBus.getDefault().post(AddFavoriteEvent(f))
                 } else {
-                    BaseApplication.favoritePostBox.remove(mFavoritePost!!)
+                    val f = mFavoritePost!!
+                    BaseApplication.favoritePostBox.remove(f)
+                    EventBus.getDefault().post(RemoveFavoriteEvent(f))
                 }
                 return true
             }
@@ -246,7 +246,7 @@ class PostMarkDownFragment : BaseRVFragment() {
     private lateinit var mPost: Post
 
     @Subscribe
-    fun onPostChange(event: PostChangeEvent) = changeItem(event.oldPost, event.newPost)
+    fun onPostChange(event: ChangePostEvent) = changeItem(event.oldPost, event.newPost)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -29,7 +29,7 @@ class BaseApplication : Application() {
         draftBox = boxStore.boxFor(NewArticle::class.java)
 
         Settings.INSTANCE.DebugMode = true
-        Settings.INSTANCE.BaseUrl = "http://192.168.43.38:5000/api/v1.0/"
+        Settings.INSTANCE.BaseUrl = "http://192.168.43.214:5000/api/v1.0/"
         UserManager.resume()
     }
 

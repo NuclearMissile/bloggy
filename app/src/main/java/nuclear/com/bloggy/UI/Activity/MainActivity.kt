@@ -241,7 +241,7 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
                     drawer_layout.closeDrawer(GravityCompat.START)
                     return false
                 }
-                supportActionBar?.setTitle(R.string.favorite)
+                supportActionBar?.setTitle(R.string.draft)
                 if (mCurrentFragment is DraftFragment)
                     mCurrentFragment.scroll2Top()
                 else
@@ -254,12 +254,49 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
 }
 
 class DraftFragment : BaseRVFragment() {
+
+    @Subscribe
+    fun onAddDraft(event: AddDraftEvent) = addItem(event.draft)
+
+    @Subscribe
+    fun onRemoveDraft(event: RemoveDraftEvent) = removeItem(event.draft)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        EventBus.getDefault().unregister(this)
+    }
+
     override fun regAdapter(mAdapter: MultiTypeAdapter) {
         mAdapter.register(NewArticle::class.java, DraftViewBinder(activity!!))
     }
 
+    override fun setUp() {
+        super.setUp()
+        isLoadMoreEnabled = false
+    }
+
     override fun loadData(current: String?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val drafts = LinkedList<NewArticle>()
+        BaseApplication.draftBox.all
+                .toFlowable()
+                .defaultSchedulers()
+                .bindToLifecycle(this)
+                .subscribeBy(onNext = {
+                    drafts.add(it)
+                }, onError = {
+                    LogUtil.e(this, it.message)
+                    ToastUtil.showLongToast(it.message)
+                    it.printStackTrace()
+                }, onComplete = {
+                    mItems.clear()
+                    mItems.addAll(drafts.sortedByDescending { it.timeStamp })
+                    mAdapter.notifyDataSetChanged()
+                })
     }
 }
 
@@ -272,7 +309,15 @@ class FavoriteFragment : BaseRVFragment(), IPostFragment {
     override fun onRemovePost(event: RemovePostEvent) = removeItem(event.post)
 
     @Subscribe
-    override fun onUpdatePost(changeEvent: PostChangeEvent) = changeItem(changeEvent.oldPost, changeEvent.newPost)
+    override fun onUpdatePost(changeEvent: ChangePostEvent) = changeItem(changeEvent.oldPost, changeEvent.newPost)
+
+    @Subscribe
+    fun onRemoveFavorite(event: RemoveFavoriteEvent) {
+        val post = mItems.firstOrNull { event.favoritePost.postId == (it as? Post)?.id } ?: return
+        val index = mItems.indexOf(post)
+        mItems.remove(post)
+        mAdapter.notifyItemRemoved(index)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -293,8 +338,6 @@ class FavoriteFragment : BaseRVFragment(), IPostFragment {
         mAdapter.register(Post::class.java, PostViewBinder(this.activity!!))
     }
 
-    override fun onNoMoreData() {}
-
     override fun loadData(current: String?) {
         val posts = LinkedList<Post>()
         val allFavorite = BaseApplication.favoritePostBox.all
@@ -312,9 +355,8 @@ class FavoriteFragment : BaseRVFragment(), IPostFragment {
                     it.printStackTrace()
                 }, onComplete = {
                     BaseApplication.favoritePostBox.remove(allFavorite.filter { it.postId !in posts.map { it.id } })
-                    posts.sortByDescending { it.timeStamp }
                     mItems.clear()
-                    mItems.addAll(posts)
+                    mItems.addAll(posts.sortedByDescending { it.timeStamp })
                     mAdapter.notifyDataSetChanged()
                 })
     }
@@ -329,7 +371,7 @@ class TimelineRVFragment : BaseRVFragment(), IPostFragment {
     override fun onRemovePost(event: RemovePostEvent) = removeItem(event.post)
 
     @Subscribe
-    override fun onUpdatePost(changeEvent: PostChangeEvent) = changeItem(changeEvent.oldPost, changeEvent.newPost)
+    override fun onUpdatePost(changeEvent: ChangePostEvent) = changeItem(changeEvent.oldPost, changeEvent.newPost)
 
     override fun regAdapter(mAdapter: MultiTypeAdapter) {
         mAdapter.register(Post::class.java, PostViewBinder(this.activity!!))
@@ -378,7 +420,7 @@ class PostsRVFragment : BaseRVFragment(), IPostFragment {
     override fun onRemovePost(event: RemovePostEvent) = removeItem(event.post)
 
     @Subscribe
-    override fun onUpdatePost(changeEvent: PostChangeEvent) = changeItem(changeEvent.oldPost, changeEvent.newPost)
+    override fun onUpdatePost(changeEvent: ChangePostEvent) = changeItem(changeEvent.oldPost, changeEvent.newPost)
 
     override fun regAdapter(mAdapter: MultiTypeAdapter) {
         mAdapter.register(Post::class.java, PostViewBinder(activity!!))

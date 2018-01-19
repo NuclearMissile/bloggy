@@ -16,10 +16,7 @@ import io.reactivex.Flowable
 import io.reactivex.rxkotlin.subscribeBy
 import me.drakeet.multitype.ItemViewBinder
 import nuclear.com.bloggy.*
-import nuclear.com.bloggy.Entity.Comment
-import nuclear.com.bloggy.Entity.NewArticle
-import nuclear.com.bloggy.Entity.Post
-import nuclear.com.bloggy.Entity.User
+import nuclear.com.bloggy.Entity.*
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.UI.Activity.EditPostActivity
 import nuclear.com.bloggy.UI.Activity.PostActivity
@@ -31,13 +28,25 @@ import ru.noties.markwon.Markwon
 class PostViewBinder(private val activity: FragmentActivity) : ItemViewBinder<Post, PostViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: Post) {
         fun onLongClick(): Boolean {
+            val favorite = BaseApplication.favoritePostBox.query()
+                    .equal(FavoritePost_.postId, item.id.toLong()).build()
+                    .findFirst()
             val popup = PopupMenu(activity, holder.itemView, Gravity.END)
             popup.menuInflater.inflate(R.menu.popup_menu_post_item, popup.menu)
-            popup.show()
             popup.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.edit_popup_post_item -> {
                         EditPostActivity.tryStart(activity, item.id)
+                        true
+                    }
+                    R.id.favorite_popup_post_item -> {
+                        if (favorite == null) {
+                            BaseApplication.favoritePostBox.put(FavoritePost(item.id))
+                            // EventBus.getDefault().post(AddFavoriteEvent(f))
+                        } else {
+                            BaseApplication.favoritePostBox.remove(favorite)
+                            EventBus.getDefault().post(RemoveFavoriteEvent(favorite))
+                        }
                         true
                     }
                     R.id.delete_popup_post_item -> {
@@ -75,12 +84,12 @@ class PostViewBinder(private val activity: FragmentActivity) : ItemViewBinder<Po
                     else -> true
                 }
             }
-            if (UserManager.isAdmin)
-                popup.menu.findItem(R.id.delete_popup_post_item).isVisible = true
-            if (UserManager.isSelfById(item.authorId)) {
-                popup.menu.findItem(R.id.edit_popup_post_item).isVisible = true
-                popup.menu.findItem(R.id.delete_popup_post_item).isVisible = true
-            }
+            popup.menu.findItem(R.id.delete_popup_post_item).isVisible = UserManager.isAdmin
+            popup.menu.findItem(R.id.edit_popup_post_item).isVisible = UserManager.isSelfById(item.authorId)
+            popup.menu.findItem(R.id.delete_popup_post_item).isVisible = UserManager.isSelfById(item.authorId)
+            popup.menu.findItem(R.id.favorite_popup_post_item).isVisible = !UserManager.isAnonymous
+            popup.menu.findItem(R.id.favorite_popup_post_item).isChecked = favorite != null
+            popup.show()
             return true
         }
 
@@ -228,22 +237,41 @@ class UserViewBinder(val activity: FragmentActivity) : ItemViewBinder<User, User
 }
 
 class DraftViewBinder(val activity: FragmentActivity) : ItemViewBinder<NewArticle, DraftViewBinder.ViewHolder>() {
+
     override fun onBindViewHolder(holder: ViewHolder, item: NewArticle) {
         fun onLongClick(): Boolean {
-            TODO()
+            val popup = PopupMenu(activity, holder.itemView, Gravity.END)
+            popup.menuInflater.inflate(R.menu.popup_menu_draft_item, popup.menu)
+            popup.show()
+            popup.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.edit_popup_draft_item -> {
+                        EditPostActivity.tryStart(activity, item.body)
+                        true
+                    }
+                    R.id.delete_popup_draft_item -> {
+                        BaseApplication.draftBox.remove(item)
+                        EventBus.getDefault().post(RemoveDraftEvent(item))
+                        true
+                    }
+                    else -> true
+                }
+            }
+            return true
         }
 
         holder.commentCountTV.visibility = View.GONE
         holder.usernameTV.text = UserManager.self?.username
         holder.timestampTV.text = DateUtil.getFriendlyTime(item.timeStamp)
+
         Glide.with(activity)
                 .load(UserManager.getAvatarUrl(UserManager.self!!.avatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)
-        Markwon.setMarkdown(holder.bodyTV, item.body)
         holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(activity, UserManager.self!!.id) }
 
+        Markwon.setMarkdown(holder.bodyTV, item.body)
         holder.itemView.setOnClickListener { EditPostActivity.tryStart(activity, item.body) }
         holder.bodyTV.setOnClickListener { EditPostActivity.tryStart(activity, item.body) }
         holder.itemView.setOnLongClickListener { onLongClick() }

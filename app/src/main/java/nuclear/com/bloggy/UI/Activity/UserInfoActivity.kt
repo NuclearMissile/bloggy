@@ -286,7 +286,7 @@ class UserPostsRVFragment : BaseRVFragment(), IPostFragment {
     override fun onRemovePost(event: RemovePostEvent) = removeItem(event.post)
 
     @Subscribe
-    override fun onUpdatePost(changeEvent: PostChangeEvent) = changeItem(changeEvent.oldPost, changeEvent.newPost)
+    override fun onUpdatePost(changeEvent: ChangePostEvent) = changeItem(changeEvent.oldPost, changeEvent.newPost)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -116,7 +116,7 @@ class EditPostActivity : SwipeBackActivity() {
     }
 
     override fun onBackPressed() {
-        if (mOriginText != mCurrentText || (mOriginPost == null && !TextUtils.isEmpty(mCurrentText))) {
+        if (mOriginText != mCurrentText || (TextUtils.isEmpty(mOriginText) && !TextUtils.isEmpty(mCurrentText))) {
             MaterialDialog.Builder(this)
                     .title(R.string.text_edit_detected)
                     .content(R.string.text_edit_detected)
@@ -126,10 +126,11 @@ class EditPostActivity : SwipeBackActivity() {
                     .onPositive { _, _ -> uploadPost() }
                     .onNegative { _, _ -> finish() }
                     .onNeutral { _, _ ->
-                        BaseApplication.draftBox.put(NewArticle(mCurrentText))
+                        val draft = NewArticle(mCurrentText)
+                        BaseApplication.draftBox.put(draft)
+                        EventBus.getDefault().post(AddDraftEvent(draft))
                         finish()
-                    }
-                    .show()
+                    }.show()
         } else {
             super.onBackPressed()
         }
@@ -158,7 +159,7 @@ class EditPostActivity : SwipeBackActivity() {
                         EventBus.getDefault().post(AddPostEvent(it))
                         ToastUtil.showShortToast("upload new post success")
                     } else {
-                        EventBus.getDefault().post(PostChangeEvent(mOriginPost!!, it))
+                        EventBus.getDefault().post(ChangePostEvent(mOriginPost!!, it))
                         ToastUtil.showShortToast("edit post success")
                     }
                     finish()
