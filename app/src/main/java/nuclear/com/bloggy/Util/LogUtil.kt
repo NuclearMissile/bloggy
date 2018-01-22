@@ -11,7 +11,8 @@ import nuclear.com.bloggy.Settings
 
 object LogUtil {
 
-    private val DEBUG_FLAG = Settings.INSTANCE.DebugMode
+    private val DEBUG_FLAG
+        get() = Settings.INSTANCE.DebugMode
 
     fun i(o: Any, msg: String?) {
         if (DEBUG_FLAG)

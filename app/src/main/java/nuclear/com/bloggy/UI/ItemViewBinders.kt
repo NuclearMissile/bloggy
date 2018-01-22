@@ -1,6 +1,6 @@
 package nuclear.com.bloggy.UI
 
-import android.support.v4.app.FragmentActivity
+import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -25,18 +25,18 @@ import nuclear.com.bloggy.Util.*
 import org.greenrobot.eventbus.EventBus
 import ru.noties.markwon.Markwon
 
-class PostViewBinder(private val activity: FragmentActivity) : ItemViewBinder<Post, PostViewBinder.ViewHolder>() {
+class PostViewBinder(private val context: Context) : ItemViewBinder<Post, PostViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: Post) {
         fun onLongClick(): Boolean {
             val favorite = BaseApplication.favoritePostBox.query()
                     .equal(FavoritePost_.postId, item.id.toLong()).build()
                     .findFirst()
-            val popup = PopupMenu(activity, holder.itemView, Gravity.END)
+            val popup = PopupMenu(context, holder.itemView, Gravity.END)
             popup.menuInflater.inflate(R.menu.popup_menu_post_item, popup.menu)
             popup.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.edit_popup_post_item -> {
-                        EditPostActivity.tryStart(activity, item.id)
+                        EditPostActivity.tryStart(context, item.id)
                         true
                     }
                     R.id.favorite_popup_post_item -> {
@@ -50,7 +50,7 @@ class PostViewBinder(private val activity: FragmentActivity) : ItemViewBinder<Po
                         true
                     }
                     R.id.delete_popup_post_item -> {
-                        MaterialDialog.Builder(activity)
+                        MaterialDialog.Builder(context)
                                 .title(R.string.delete_confirm)
                                 .content(R.string.delete_confirm_content)
                                 .positiveText(R.string.ok)
@@ -78,7 +78,7 @@ class PostViewBinder(private val activity: FragmentActivity) : ItemViewBinder<Po
                         true
                     }
                     R.id.share_popup_post_item -> {
-                        ShareUtil.shareText(activity, "Share post's link...", item.link)
+                        ShareUtil.shareText(context, "Share post's link...", item.link)
                         true
                     }
                     else -> true
@@ -95,18 +95,18 @@ class PostViewBinder(private val activity: FragmentActivity) : ItemViewBinder<Po
 
         Markwon.setMarkdown(holder.bodyTV, item.body)
         holder.timestampTV.text = DateUtil.getFriendlyTime(item.timeStamp)
-        Glide.with(activity)
+        Glide.with(context)
                 .load(UserManager.getAvatarUrl(item.authorAvatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)
-        holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(activity, item.authorId) }
+        holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(context, item.authorId) }
         holder.usernameTV.text = item.authorName
         holder.commentCountTV.text = "Comments: ${item.commentsCount}"
-        holder.itemView.setOnClickListener { PostActivity.tryStart(activity, item.id) }
+        holder.itemView.setOnClickListener { PostActivity.tryStart(context, item.id) }
         holder.itemView.setOnLongClickListener { onLongClick() }
         holder.bodyTV.setOnLongClickListener { onLongClick() }
-        holder.bodyTV.setOnClickListener { PostActivity.tryStart(activity, item.id) }
+        holder.bodyTV.setOnClickListener { PostActivity.tryStart(context, item.id) }
     }
 
     override fun onCreateViewHolder(inflater: LayoutInflater, parent: ViewGroup): ViewHolder {
@@ -122,18 +122,18 @@ class PostViewBinder(private val activity: FragmentActivity) : ItemViewBinder<Po
     }
 }
 
-class CommentViewBinder(private val activity: FragmentActivity) : ItemViewBinder<Comment, CommentViewBinder.ViewHolder>() {
+class CommentViewBinder(private val context: Context) : ItemViewBinder<Comment, CommentViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: Comment) {
         fun onLongClick(): Boolean {
             if (!UserManager.isAdmin && !UserManager.isSelfById(item.authorId))
                 return true
-            val popup = PopupMenu(activity, holder.itemView, Gravity.END)
+            val popup = PopupMenu(context, holder.itemView, Gravity.END)
             popup.menuInflater.inflate(R.menu.popup_menu_comment_item, popup.menu)
             popup.show()
             popup.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.delete_popup_comment_item -> {
-                        MaterialDialog.Builder(activity)
+                        MaterialDialog.Builder(context)
                                 .title(R.string.delete_confirm)
                                 .content(R.string.delete_confirm_content)
                                 .positiveText(R.string.ok)
@@ -165,12 +165,12 @@ class CommentViewBinder(private val activity: FragmentActivity) : ItemViewBinder
             return true
         }
 
-        Glide.with(activity)
+        Glide.with(context)
                 .load(UserManager.getAvatarUrl(item.authorAvatarHash, 60))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)
-        holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(activity, item.authorId) }
+        holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(context, item.authorId) }
         holder.usernameTV.text = item.authorName
         Markwon.setMarkdown(holder.commentTV, item.body)
         holder.timeStampTV.text = DateUtil.getFriendlyTime(item.timeStamp)
@@ -208,9 +208,9 @@ class PostContentViewBinder : ItemViewBinder<Post, PostContentViewBinder.ViewHol
     }
 }
 
-class UserViewBinder(val activity: FragmentActivity) : ItemViewBinder<User, UserViewBinder.ViewHolder>() {
+class UserViewBinder(private val context: Context) : ItemViewBinder<User, UserViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: User) {
-        Glide.with(activity)
+        Glide.with(context)
                 .load(UserManager.getAvatarUrl(item.avatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
@@ -222,7 +222,7 @@ class UserViewBinder(val activity: FragmentActivity) : ItemViewBinder<User, User
             holder.aboutMeTV.visibility = View.VISIBLE
             holder.aboutMeTV.text = item.aboutMe
         }
-        holder.itemView.setOnClickListener { UserInfoActivity.tryStart(activity, item.id) }
+        holder.itemView.setOnClickListener { UserInfoActivity.tryStart(context, item.id) }
     }
 
     override fun onCreateViewHolder(inflater: LayoutInflater, parent: ViewGroup): ViewHolder {
@@ -236,17 +236,16 @@ class UserViewBinder(val activity: FragmentActivity) : ItemViewBinder<User, User
     }
 }
 
-class DraftViewBinder(val activity: FragmentActivity) : ItemViewBinder<NewArticle, DraftViewBinder.ViewHolder>() {
-
+class DraftViewBinder(private val context: Context) : ItemViewBinder<NewArticle, DraftViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: NewArticle) {
         fun onLongClick(): Boolean {
-            val popup = PopupMenu(activity, holder.itemView, Gravity.END)
+            val popup = PopupMenu(context, holder.itemView, Gravity.END)
             popup.menuInflater.inflate(R.menu.popup_menu_draft_item, popup.menu)
             popup.show()
             popup.setOnMenuItemClickListener {
                 when (it.itemId) {
                     R.id.edit_popup_draft_item -> {
-                        EditPostActivity.tryStart(activity, item.body)
+                        EditPostActivity.tryStart(context, item.body)
                         true
                     }
                     R.id.delete_popup_draft_item -> {
@@ -264,16 +263,16 @@ class DraftViewBinder(val activity: FragmentActivity) : ItemViewBinder<NewArticl
         holder.usernameTV.text = UserManager.self?.username
         holder.timestampTV.text = DateUtil.getFriendlyTime(item.timeStamp)
 
-        Glide.with(activity)
+        Glide.with(context)
                 .load(UserManager.getAvatarUrl(UserManager.self!!.avatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)
-        holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(activity, UserManager.self!!.id) }
+        holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(context, UserManager.self!!.id) }
 
         Markwon.setMarkdown(holder.bodyTV, item.body)
-        holder.itemView.setOnClickListener { EditPostActivity.tryStart(activity, item.body) }
-        holder.bodyTV.setOnClickListener { EditPostActivity.tryStart(activity, item.body) }
+        holder.itemView.setOnClickListener { EditPostActivity.tryStart(context, item.body) }
+        holder.bodyTV.setOnClickListener { EditPostActivity.tryStart(context, item.body) }
         holder.itemView.setOnLongClickListener { onLongClick() }
         holder.bodyTV.setOnLongClickListener { onLongClick() }
     }

@@ -25,8 +25,15 @@ class ServiceFactory private constructor() {
     }
 
     companion object {
-        val DEF_SERVICE by lazy {
-            ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
+        var DEF_SERVICE =
+                ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
+
+        fun refresh() {
+            DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
         }
+
+        /*val DEF_SERVICE by lazy {
+            ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
+        }*/
     }
 }

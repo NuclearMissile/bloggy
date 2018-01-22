@@ -11,7 +11,6 @@ import nuclear.com.bloggy.R
  */
 object GlideOptions {
     val DEF_OPTION: RequestOptions = RequestOptions()
-            .placeholder(R.mipmap.ic_launcher_round)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .priority(Priority.IMMEDIATE)
             .transform(CircleCrop())

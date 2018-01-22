@@ -35,10 +35,10 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="settings">Settings</string>
     <string name="action_share">Share</string>
-    <string name="action_log_out">Log out</string>
-    <string name="title_activity_login">Sign in</string>
+    <string name="log_out">Log out</string>
+    <string name="sign_in">Sign in</string>
 
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
@@ -73,6 +73,18 @@
     <string name="exit_without_saving">Exit Without Saving</string>
     <string name="upload_post">Upload Post</string>
     <string name="exit">Exit</string>
+    <string name="user_info">User Info</string>
+    <string name="cache_info">Cache Info</string>
+    <string name="debug_mode">DebugMode</string>
+    <string name="base_url">BaseUrl</string>
+    <string name="about">About</string>
+    <string name="anonymous">Anonymous</string>
+    <string name="click_to_login">Click to Login</string>
+    <string name="click_to_clear_cache">Click to Clear Cache</string>
+    <string name="app_cache_clear">App Cache Clear!</string>
+    <string name="about_bloggy">About Bloggy</string>
+    <string name="app_settings">App Settings</string>
+    <string name="app_info">App Info</string>
 
     <string name="default_username_header">Anonymous User</string>
     <string name="default_email_header">example@gmail.com</string>

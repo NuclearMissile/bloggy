@@ -16,13 +16,15 @@ class Settings private constructor() {
         val INSTANCE = Settings()
     }
 
-    var OnlyWifiLoadImage: Boolean
+    private fun getResString(id: Int): String = BaseApplication.instance.resources.getString(id)
+
+/*    var OnlyWifiLoadImage: Boolean
         get() = mPrefs.getBoolean("OnlyWifiLoadImage", false)
-        set(value) = mEditor.putBoolean("OnlyWifiLoadImage", value).apply()
+        set(value) = mEditor.putBoolean("OnlyWifiLoadImage", value).apply()*/
 
     var DebugMode: Boolean
-        get() = mPrefs.getBoolean("DebugMode", false)
-        set(value) = mEditor.putBoolean("DebugMode", value).apply()
+        get() = mPrefs.getBoolean(getResString(R.string.debug_mode), false)
+        set(value) = mEditor.putBoolean(getResString(R.string.debug_mode), value).apply()
 
     var Password: String?
         get() = mEncryptPrefs.getString("Password", null)
@@ -37,8 +39,8 @@ class Settings private constructor() {
         set(value) = mEncryptEditor.putLong("TokenExpireAt", value).apply()
 
     var BaseUrl: String?
-        get() = mPrefs.getString("BaseUrl", null)
-        set(value) = mEditor.putString("BaseUrl", value).apply()
+        get() = mPrefs.getString(getResString(R.string.base_url), null)
+        set(value) = mEditor.putString(getResString(R.string.base_url), value).apply()
 
     var SavedUser: User?
         get() {

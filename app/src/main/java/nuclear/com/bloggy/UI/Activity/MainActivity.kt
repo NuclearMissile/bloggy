@@ -206,6 +206,7 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.nav_settings -> SettingsActivity.tryStart(this)
             R.id.nav_all -> {
                 supportActionBar?.setTitle(R.string.all_post)
                 if (mCurrentFragment is PostsRVFragment)

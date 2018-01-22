@@ -38,6 +38,7 @@
             android:layout_height="match_parent"
             android:background="@null"
             android:gravity="top"
+            android:inputType="textMultiLine"
             android:textSize="20sp" />
 
     </android.support.v4.widget.NestedScrollView>

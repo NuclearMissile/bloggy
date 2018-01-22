@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/user_info">
+        <Preference android:key="@string/user_info" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/app_settings">
+        <Preference android:key="@string/base_url" />
+
+        <Preference android:key="@string/cache_info" />
+
+        <SwitchPreference
+            android:key="@string/debug_mode"
+            android:title="@string/debug_mode" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/app_info">
+        <Preference android:key="@string/about_bloggy" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

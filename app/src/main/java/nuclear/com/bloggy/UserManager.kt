@@ -80,7 +80,8 @@ object UserManager {
         return throwable.flatMap {
             if (it is TokenInvalidException) {
                 LogUtil.i(this, it.message)
-                ServiceFactory.DEF_SERVICE.getToken(UserManager.getAuthHeaderByPassword()).doOnNext { UserManager.saveToken(it.result) }
+                ServiceFactory.DEF_SERVICE.getToken(getAuthHeaderByPassword())
+                        .doOnNext { saveToken(it.result) }
             } else
                 throw it
         }

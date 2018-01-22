@@ -30,6 +30,7 @@
             android:name=".UI.Activity.LogInActivity"
             android:label="@string/login"
             android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
             tools:ignore="InnerclassSeparator" />
         <activity
             android:name=".UI.Activity.UserInfoActivity"
@@ -44,10 +45,16 @@
             android:name=".UI.Activity.EditPostActivity"
             android:label="@string/title_activity_edit"
             android:theme="@style/AppTheme.NoActionBar1"
-            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"
             tools:ignore="InnerclassSeparator" />
         <activity
             android:name=".UI.Activity.AboutActivity"
+            android:label="@string/about"
+            android:theme="@style/AppTheme.About"
+            tools:ignore="InnerclassSeparator" />
+        <activity
+            android:name=".UI.Activity.SettingsActivity"
+            android:label="@string/settings"
             tools:ignore="InnerclassSeparator" />
     </application>
 

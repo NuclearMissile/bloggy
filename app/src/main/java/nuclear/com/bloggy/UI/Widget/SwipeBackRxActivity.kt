@@ -22,6 +22,7 @@ abstract class SwipeBackRxActivity : RxAppCompatActivity(), ISwipeBackActivity {
         mHelper.onPostCreate()
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : View> findViewById(id: Int): T? {
         val v: T? = super.findViewById(id)
         return v ?: mHelper.findViewById(id) as? T
