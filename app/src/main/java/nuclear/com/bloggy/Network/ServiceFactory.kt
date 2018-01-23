@@ -25,8 +25,8 @@ class ServiceFactory private constructor() {
     }
 
     companion object {
-        var DEF_SERVICE =
-                ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
+        var DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
+            private set
 
         fun refresh() {
             DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)

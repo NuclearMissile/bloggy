@@ -72,7 +72,7 @@ class PostActivity : SwipeBackRxActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (UserManager.isSelfById(mPost.authorId))
+        if (UserHolder.isSelfById(mPost.authorId))
             Handler().postDelayed({
                 fab_post.show()
             }, 200)
@@ -95,13 +95,13 @@ class PostActivity : SwipeBackRxActivity() {
                             }
                             Flowable.just(1)
                                     .flatMap {
-                                        if (!UserManager.isSavedTokenValid)
+                                        if (!UserHolder.isSavedTokenValid)
                                             throw TokenInvalidException()
                                         else
                                             ServiceFactory.DEF_SERVICE.newComment(mPost.id, NewArticle(met.text.toString()),
-                                                    UserManager.getAuthHeaderByToken())
+                                                    UserHolder.getAuthHeaderByToken())
                                     }
-                                    .retryWhen(UserManager::retryForToken)
+                                    .retryWhen(UserHolder::retryForToken)
                                     .map { if (it.isSuccess) it.result else throw Exception(it.message) }
                                     .bindToLifecycle(this)
                                     .defaultSchedulers()
@@ -122,12 +122,12 @@ class PostActivity : SwipeBackRxActivity() {
     private fun deletePost() {
         Flowable.just(1)
                 .flatMap {
-                    if (!UserManager.isSavedTokenValid)
+                    if (!UserHolder.isSavedTokenValid)
                         throw TokenInvalidException()
                     else
-                        ServiceFactory.DEF_SERVICE.deletePost(mPost.id, UserManager.getAuthHeaderByToken())
+                        ServiceFactory.DEF_SERVICE.deletePost(mPost.id, UserHolder.getAuthHeaderByToken())
                 }
-                .retryWhen(UserManager::retryForToken)
+                .retryWhen(UserHolder::retryForToken)
                 .map { if (it.isSuccess) it else throw Exception(it.message) }
                 .defaultSchedulers()
                 .bindToLifecycle(this)
@@ -168,7 +168,7 @@ class PostActivity : SwipeBackRxActivity() {
                 when (tab.position) {
                     0 -> {
                         supportActionBar?.setTitle(R.string.post)
-                        if (UserManager.isSelfById(mPost.authorId)) {
+                        if (UserHolder.isSelfById(mPost.authorId)) {
                             fab_post.setImageResource(R.drawable.pencil)
                             fab_post.show()
                         } else
@@ -176,7 +176,7 @@ class PostActivity : SwipeBackRxActivity() {
                     }
                     1 -> {
                         supportActionBar?.setTitle(R.string.comment)
-                        if (UserManager.can(Permission.COMMENT)) {
+                        if (UserHolder.can(Permission.COMMENT)) {
                             fab_post.setImageResource(R.drawable.message)
                             fab_post.show()
                         } else
@@ -188,10 +188,10 @@ class PostActivity : SwipeBackRxActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.delete_post).isVisible = UserManager.isAdmin
-        menu.findItem(R.id.edit_post).isVisible = UserManager.isSelfById(mPost.authorId)
-        menu.findItem(R.id.delete_post).isVisible = UserManager.isSelfById(mPost.authorId)
-        menu.findItem(R.id.favorite_post).isVisible = !UserManager.isAnonymous
+        menu.findItem(R.id.delete_post).isVisible = UserHolder.isAdmin
+        menu.findItem(R.id.edit_post).isVisible = UserHolder.isSelfById(mPost.authorId)
+        menu.findItem(R.id.delete_post).isVisible = UserHolder.isSelfById(mPost.authorId)
+        menu.findItem(R.id.favorite_post).isVisible = !UserHolder.isAnonymous
         menu.findItem(R.id.favorite_post).isChecked = mFavoritePost != null
         return super.onPrepareOptionsMenu(menu)
     }
@@ -281,7 +281,6 @@ class PostMarkDownFragment : BaseRVFragment() {
                     LogUtil.e(this, it.message)
                     ToastUtil.showLongToast(it.message)
                     it.printStackTrace()
-                    // jh
                 })
     }
 

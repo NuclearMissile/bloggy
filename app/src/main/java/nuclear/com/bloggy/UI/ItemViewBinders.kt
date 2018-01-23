@@ -58,12 +58,12 @@ class PostViewBinder(private val context: Context) : ItemViewBinder<Post, PostVi
                                 .onPositive { _, _ ->
                                     Flowable.just(1)
                                             .flatMap {
-                                                if (!UserManager.isSavedTokenValid)
+                                                if (!UserHolder.isSavedTokenValid)
                                                     throw TokenInvalidException()
                                                 else
-                                                    ServiceFactory.DEF_SERVICE.deletePost(item.id, UserManager.getAuthHeaderByToken())
+                                                    ServiceFactory.DEF_SERVICE.deletePost(item.id, UserHolder.getAuthHeaderByToken())
                                             }
-                                            .retryWhen(UserManager::retryForToken)
+                                            .retryWhen(UserHolder::retryForToken)
                                             .map { if (it.isSuccess) it else throw Exception(it.message) }
                                             .defaultSchedulers()
                                             .subscribeBy(onNext = {
@@ -84,10 +84,10 @@ class PostViewBinder(private val context: Context) : ItemViewBinder<Post, PostVi
                     else -> true
                 }
             }
-            popup.menu.findItem(R.id.delete_popup_post_item).isVisible = UserManager.isAdmin
-            popup.menu.findItem(R.id.edit_popup_post_item).isVisible = UserManager.isSelfById(item.authorId)
-            popup.menu.findItem(R.id.delete_popup_post_item).isVisible = UserManager.isSelfById(item.authorId)
-            popup.menu.findItem(R.id.favorite_popup_post_item).isVisible = !UserManager.isAnonymous
+            popup.menu.findItem(R.id.delete_popup_post_item).isVisible = UserHolder.isAdmin
+            popup.menu.findItem(R.id.edit_popup_post_item).isVisible = UserHolder.isSelfById(item.authorId)
+            popup.menu.findItem(R.id.delete_popup_post_item).isVisible = UserHolder.isSelfById(item.authorId)
+            popup.menu.findItem(R.id.favorite_popup_post_item).isVisible = !UserHolder.isAnonymous
             popup.menu.findItem(R.id.favorite_popup_post_item).isChecked = favorite != null
             popup.show()
             return true
@@ -96,7 +96,7 @@ class PostViewBinder(private val context: Context) : ItemViewBinder<Post, PostVi
         Markwon.setMarkdown(holder.bodyTV, item.body)
         holder.timestampTV.text = DateUtil.getFriendlyTime(item.timeStamp)
         Glide.with(context)
-                .load(UserManager.getAvatarUrl(item.authorAvatarHash, 120))
+                .load(UserHolder.getAvatarUrl(item.authorAvatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)
@@ -125,7 +125,7 @@ class PostViewBinder(private val context: Context) : ItemViewBinder<Post, PostVi
 class CommentViewBinder(private val context: Context) : ItemViewBinder<Comment, CommentViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: Comment) {
         fun onLongClick(): Boolean {
-            if (!UserManager.isAdmin && !UserManager.isSelfById(item.authorId))
+            if (!UserHolder.isAdmin && !UserHolder.isSelfById(item.authorId))
                 return true
             val popup = PopupMenu(context, holder.itemView, Gravity.END)
             popup.menuInflater.inflate(R.menu.popup_menu_comment_item, popup.menu)
@@ -141,12 +141,12 @@ class CommentViewBinder(private val context: Context) : ItemViewBinder<Comment, 
                                 .onPositive { _, _ ->
                                     Flowable.just(1)
                                             .flatMap {
-                                                if (!UserManager.isSavedTokenValid)
+                                                if (!UserHolder.isSavedTokenValid)
                                                     throw TokenInvalidException()
                                                 else
-                                                    ServiceFactory.DEF_SERVICE.deleteComment(item.id, UserManager.getAuthHeaderByToken())
+                                                    ServiceFactory.DEF_SERVICE.deleteComment(item.id, UserHolder.getAuthHeaderByToken())
                                             }
-                                            .retryWhen(UserManager::retryForToken)
+                                            .retryWhen(UserHolder::retryForToken)
                                             .map { if (it.isSuccess) it else throw Exception(it.message) }
                                             .defaultSchedulers()
                                             .subscribeBy(onNext = {
@@ -166,7 +166,7 @@ class CommentViewBinder(private val context: Context) : ItemViewBinder<Comment, 
         }
 
         Glide.with(context)
-                .load(UserManager.getAvatarUrl(item.authorAvatarHash, 60))
+                .load(UserHolder.getAvatarUrl(item.authorAvatarHash, 60))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)
@@ -211,7 +211,7 @@ class PostContentViewBinder : ItemViewBinder<Post, PostContentViewBinder.ViewHol
 class UserViewBinder(private val context: Context) : ItemViewBinder<User, UserViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: User) {
         Glide.with(context)
-                .load(UserManager.getAvatarUrl(item.avatarHash, 120))
+                .load(UserHolder.getAvatarUrl(item.avatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)
@@ -260,15 +260,15 @@ class DraftViewBinder(private val context: Context) : ItemViewBinder<NewArticle,
         }
 
         holder.commentCountTV.visibility = View.GONE
-        holder.usernameTV.text = UserManager.self?.username
+        holder.usernameTV.text = UserHolder.self?.username
         holder.timestampTV.text = DateUtil.getFriendlyTime(item.timeStamp)
 
         Glide.with(context)
-                .load(UserManager.getAvatarUrl(UserManager.self!!.avatarHash, 120))
+                .load(UserHolder.getAvatarUrl(UserHolder.self!!.avatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)
-        holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(context, UserManager.self!!.id) }
+        holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(context, UserHolder.self!!.id) }
 
         Markwon.setMarkdown(holder.bodyTV, item.body)
         holder.itemView.setOnClickListener { EditPostActivity.tryStart(context, item.body) }

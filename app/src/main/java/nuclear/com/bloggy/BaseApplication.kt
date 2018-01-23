@@ -27,7 +27,7 @@ class BaseApplication : Application() {
         boxStore = MyObjectBox.builder().androidContext(this).build()
         favoritePostBox = boxStore.boxFor(FavoritePost::class.java)
         draftBox = boxStore.boxFor(NewArticle::class.java)
-        UserManager.resume()
+        UserHolder.resume()
     }
 
     override fun getCacheDir(): File {

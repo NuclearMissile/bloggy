@@ -34,8 +34,8 @@ class EditPostActivity : SwipeBackRxActivity() {
 
     companion object {
         fun tryStart(context: Context) {
-            if (!UserManager.can(Permission.WRITE)) {
-                UserManager.handlePermissionError(context, Permission.WRITE)
+            if (!UserHolder.can(Permission.WRITE)) {
+                UserHolder.handlePermissionError(context, Permission.WRITE)
                 return
             }
             val intent = Intent(context, EditPostActivity::class.java)
@@ -43,8 +43,8 @@ class EditPostActivity : SwipeBackRxActivity() {
         }
 
         fun tryStart(context: Context, imported: String) {
-            if (!UserManager.can(Permission.WRITE)) {
-                UserManager.handlePermissionError(context, Permission.WRITE)
+            if (!UserHolder.can(Permission.WRITE)) {
+                UserHolder.handlePermissionError(context, Permission.WRITE)
                 return
             }
             val intent = Intent(context, EditPostActivity::class.java)
@@ -58,9 +58,9 @@ class EditPostActivity : SwipeBackRxActivity() {
                     .map { if (it.isSuccess) it.result else throw Exception(it.message) }
                     .defaultSchedulers()
                     .subscribeBy(onNext = {
-                        if (!UserManager.can(Permission.WRITE)) {
-                            UserManager.handlePermissionError(context, Permission.WRITE)
-                        } else if (!UserManager.isSelfById(it.authorId)) {
+                        if (!UserHolder.can(Permission.WRITE)) {
+                            UserHolder.handlePermissionError(context, Permission.WRITE)
+                        } else if (!UserHolder.isSelfById(it.authorId)) {
                             LogUtil.w(this, "try to edit a post not by self")
                         } else {
                             val intent = Intent(context, EditPostActivity::class.java)
@@ -137,18 +137,18 @@ class EditPostActivity : SwipeBackRxActivity() {
     private fun uploadPost() {
         Flowable.just(1)
                 .flatMap {
-                    if (!UserManager.isSavedTokenValid)
+                    if (!UserHolder.isSavedTokenValid)
                         throw TokenInvalidException()
                     else {
                         if (mOriginPost == null)
                             ServiceFactory.DEF_SERVICE
-                                    .newPost(NewArticle(mCurrentText.toString()), UserManager.getAuthHeaderByToken())
+                                    .newPost(NewArticle(mCurrentText.toString()), UserHolder.getAuthHeaderByToken())
                         else
                             ServiceFactory.DEF_SERVICE
-                                    .editPost(NewArticle(mCurrentText.toString()), mOriginPost!!.id, UserManager.getAuthHeaderByToken())
+                                    .editPost(NewArticle(mCurrentText.toString()), mOriginPost!!.id, UserHolder.getAuthHeaderByToken())
                     }
                 }
-                .retryWhen(UserManager::retryForToken)
+                .retryWhen(UserHolder::retryForToken)
                 .map { if (it.isSuccess) it.result else throw Exception(it.message) }
                 .bindToLifecycle(this)
                 .defaultSchedulers()

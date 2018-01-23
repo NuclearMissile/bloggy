@@ -15,7 +15,7 @@ import com.bumptech.glide.request.transition.Transition
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.R
 import nuclear.com.bloggy.Settings
-import nuclear.com.bloggy.UserManager
+import nuclear.com.bloggy.UserHolder
 import nuclear.com.bloggy.Util.GlideOptions
 import nuclear.com.bloggy.Util.ToastUtil
 import nuclear.com.bloggy.Util.clearAllCache
@@ -108,7 +108,7 @@ class SettingsFragment : PreferenceFragment() {
 
     private fun refreshUserInfo() {
         val pref = findPreference(R.string.user_info)
-        if (UserManager.isAnonymous) {
+        if (UserHolder.isAnonymous) {
             pref.title = resources.getString(R.string.anonymous)
             pref.summary = resources.getString(R.string.click_to_login)
             pref.setOnPreferenceClickListener {
@@ -116,14 +116,14 @@ class SettingsFragment : PreferenceFragment() {
                 true
             }
         } else {
-            pref.title = UserManager.self!!.username
-            pref.summary = UserManager.self!!.email
+            pref.title = UserHolder.self!!.username
+            pref.summary = UserHolder.self!!.email
             pref.setOnPreferenceClickListener {
-                UserInfoActivity.tryStart(activity, UserManager.self!!.id)
+                UserInfoActivity.tryStart(activity, UserHolder.self!!.id)
                 true
             }
             Glide.with(context)
-                    .load(UserManager.getAvatarUrl(UserManager.self!!.avatarHash, 120))
+                    .load(UserHolder.getAvatarUrl(UserHolder.self!!.avatarHash, 120))
                     .apply(GlideOptions.DEF_OPTION)
                     .into(object : SimpleTarget<Drawable>() {
                         override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {

@@ -102,7 +102,7 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun onFabClick() {
-        if (UserManager.isAnonymous) {
+        if (UserHolder.isAnonymous) {
             LogInActivity.tryStart(this)
             return
         }
@@ -142,11 +142,11 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
     private fun onAvatarClick() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START))
             drawer_layout.closeDrawer(GravityCompat.START)
-        UserInfoActivity.tryStart(this, UserManager.self?.id)
+        UserInfoActivity.tryStart(this, UserHolder.self?.id)
     }
 
     private fun syncUIState() {
-        if (UserManager.isAnonymous) {
+        if (UserHolder.isAnonymous) {
             Glide.with(this)
                     .load(R.mipmap.ic_launcher_round)
                     .apply(GlideOptions.DEF_OPTION)
@@ -158,12 +158,12 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
             onNavigationItemSelected(nav_view.menu.findItem(R.id.nav_all))
         } else {
             Glide.with(this)
-                    .load(UserManager.getAvatarUrl(128))
+                    .load(UserHolder.getAvatarUrl(128))
                     .apply(GlideOptions.DEF_OPTION)
                     .transition(withCrossFade())
                     .into(avatarImageView)
-            usernameTextView.text = UserManager.self!!.username
-            emailTextView.text = UserManager.self!!.email
+            usernameTextView.text = UserHolder.self!!.username
+            emailTextView.text = UserHolder.self!!.email
         }
     }
 
@@ -216,7 +216,7 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
                     replaceFragment(PostsRVFragment())
             }
             R.id.nav_time_line -> {
-                if (UserManager.isAnonymous) {
+                if (UserHolder.isAnonymous) {
                     LogInActivity.tryStart(this)
                     drawer_layout.closeDrawer(GravityCompat.START)
                     return false
@@ -228,7 +228,7 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
                     replaceFragment(TimelineRVFragment())
             }
             R.id.nav_favorite -> {
-                if (UserManager.isAnonymous) {
+                if (UserHolder.isAnonymous) {
                     LogInActivity.tryStart(this)
                     drawer_layout.closeDrawer(GravityCompat.START)
                     return false
@@ -240,7 +240,7 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
                     replaceFragment(FavoriteFragment())
             }
             R.id.nav_draft -> {
-                if (UserManager.isAnonymous) {
+                if (UserHolder.isAnonymous) {
                     LogInActivity.tryStart(this)
                     drawer_layout.closeDrawer(GravityCompat.START)
                     return false
@@ -394,14 +394,14 @@ class TimelineRVFragment : BaseRVFragment(), IPostFragment {
     override fun loadData(current: String?) {
         Flowable.just(1)
                 .flatMap {
-                    if (!UserManager.isSavedTokenValid)
+                    if (!UserHolder.isSavedTokenValid)
                         throw TokenInvalidException("cached token is invalid")
                     if (current == null)
-                        ServiceFactory.DEF_SERVICE.getTimeline(UserManager.getAuthHeaderByToken())
+                        ServiceFactory.DEF_SERVICE.getTimeline(UserHolder.getAuthHeaderByToken())
                     else
-                        ServiceFactory.DEF_SERVICE.getTimeline(UserManager.getAuthHeaderByToken(), current)
+                        ServiceFactory.DEF_SERVICE.getTimeline(UserHolder.getAuthHeaderByToken(), current)
                 }
-                .retryWhen(UserManager::retryForToken)
+                .retryWhen(UserHolder::retryForToken)
                 .map { if (it.isSuccess) it.result else throw Exception(it.message) }
                 .bindToLifecycle(this)
                 .defaultSchedulers()

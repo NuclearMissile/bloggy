@@ -26,7 +26,7 @@ import nuclear.com.bloggy.Entity.NewUser
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.R
 import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
-import nuclear.com.bloggy.UserManager
+import nuclear.com.bloggy.UserHolder
 import nuclear.com.bloggy.Util.*
 import okhttp3.RequestBody
 import java.util.*
@@ -35,7 +35,7 @@ class LogInActivity : SwipeBackRxActivity() {
 
     companion object {
         fun tryStart(context: Context) {
-            if (UserManager.isAnonymous) {
+            if (UserHolder.isAnonymous) {
                 val intent = Intent(context, LogInActivity::class.java)
                 context.startActivity(intent)
             }
@@ -200,7 +200,7 @@ class LogInActivity : SwipeBackRxActivity() {
                     .defaultSchedulers()
                     .bindToLifecycle(this)
                     .subscribeBy(onNext = {
-                        UserManager.login(it, password)
+                        UserHolder.login(it, password)
                         LogUtil.i(this, "User(${it.username}, $${it.id}) log in success")
                         finish()
                     }, onError = {
@@ -226,7 +226,7 @@ class LogInActivity : SwipeBackRxActivity() {
                     .bindToLifecycle(this)
                     .defaultSchedulers()
                     .subscribeBy(onNext = {
-                        UserManager.login(it, password)
+                        UserHolder.login(it, password)
                         LogUtil.i(this, "User(${it.username}, $${it.id}) sign up success")
                         finish()
                     }, onError = {

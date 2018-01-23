@@ -9,7 +9,7 @@ import nuclear.com.bloggy.Util.DateUtil
 import nuclear.com.bloggy.Util.LogUtil
 import nuclear.com.bloggy.Util.OkHttpUtil
 
-object UserManager {
+object UserHolder {
     @Volatile
     var self: User? = null
         private set
@@ -29,7 +29,7 @@ object UserManager {
 
     fun handlePermissionError(context: Context, needed: Int) {
         when {
-            UserManager.isAnonymous -> LogInActivity.tryStart(context)
+            UserHolder.isAnonymous -> LogInActivity.tryStart(context)
             else -> LogUtil.e(this, "permission error not be handled: need $needed")
         }
     }

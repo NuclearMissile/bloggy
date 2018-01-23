@@ -38,7 +38,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
 
     companion object {
         fun tryStart(context: Context, id: Int?) {
-            if (id == null || UserManager.isAnonymous) {
+            if (id == null || UserHolder.isAnonymous) {
                 LogInActivity.tryStart(context)
             } else {
                 val intent = Intent(context, UserInfoActivity::class.java)
@@ -62,7 +62,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
     }
 
     override fun onStart() {
-        if (UserManager.isAnonymous)
+        if (UserHolder.isAnonymous)
             finish()
         else
             init()
@@ -95,12 +95,12 @@ class UserInfoActivity : SwipeBackRxActivity() {
     private fun init() {
         Flowable.concat(Flowable.just(1)
                 .flatMap {
-                    if (!UserManager.isSavedTokenValid)
+                    if (!UserHolder.isSavedTokenValid)
                         throw TokenInvalidException()
-                    ServiceFactory.DEF_SERVICE.getFollowState(mId, UserManager.getAuthHeaderByToken())
+                    ServiceFactory.DEF_SERVICE.getFollowState(mId, UserHolder.getAuthHeaderByToken())
                 }, ServiceFactory.DEF_SERVICE.getUserById(mId))
-                .retryWhen(UserManager::retryForToken)
-                .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                .retryWhen(UserHolder::retryForToken)
+                .checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
@@ -120,7 +120,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
 
     private fun syncUI() {
         var toolbarTitle = mUser.username
-        if (UserManager.isSelfById(mUser.id)) {
+        if (UserHolder.isSelfById(mUser.id)) {
             follow_unfollow_btn_user_info.visibility = View.GONE
             edit_btn_user_info.visibility = View.VISIBLE
             toolbarTitle += " [Self]"
@@ -140,7 +140,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
         else
             about_me_tv_user_info.text = mUser.aboutMe
         Glide.with(this)
-                .load(UserManager.getAvatarUrl(mUser.avatarHash, 120))
+                .load(UserHolder.getAvatarUrl(mUser.avatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(withCrossFade())
                 .into(avatar_iv_user_info)
@@ -155,15 +155,15 @@ class UserInfoActivity : SwipeBackRxActivity() {
         follow_unfollow_btn_user_info.isEnabled = false
         Flowable.just(1)
                 .flatMap {
-                    if (!UserManager.isSavedTokenValid)
+                    if (!UserHolder.isSavedTokenValid)
                         throw TokenInvalidException()
                     if (mFollowState.isFollowing)
-                        ServiceFactory.DEF_SERVICE.unfollowUser(mUser.id, UserManager.getAuthHeaderByToken())
+                        ServiceFactory.DEF_SERVICE.unfollowUser(mUser.id, UserHolder.getAuthHeaderByToken())
                     else
-                        ServiceFactory.DEF_SERVICE.followUser(mUser.id, UserManager.getAuthHeaderByToken())
+                        ServiceFactory.DEF_SERVICE.followUser(mUser.id, UserHolder.getAuthHeaderByToken())
                 }
-                .retryWhen(UserManager::retryForToken)
-                .map { if (it.isSuccess) it else throw Exception(it.message) }
+                .retryWhen(UserHolder::retryForToken)
+                .checkApiErrorN()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
@@ -185,7 +185,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_user_info, menu)
-        menu.findItem(R.id.action_log_out).isVisible = UserManager.self!!.id == mId
+        menu.findItem(R.id.action_log_out).isVisible = UserHolder.self!!.id == mId
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -193,9 +193,9 @@ class UserInfoActivity : SwipeBackRxActivity() {
         when (item.itemId) {
             android.R.id.home -> finish()
             R.id.action_share ->
-                ShareUtil.shareText(this, "Share self link...", UserManager.self!!.userLink)
+                ShareUtil.shareText(this, "Share self link...", UserHolder.self!!.userLink)
             R.id.action_log_out -> {
-                UserManager.logout()
+                UserHolder.logout()
                 finish()
                 return true
             }
@@ -214,17 +214,17 @@ class FollowedbysFragment : BaseRVFragment() {
     override fun loadData(current: String?) {
         Flowable.just(1)
                 .flatMap {
-                    if (!UserManager.isSavedTokenValid)
+                    if (!UserHolder.isSavedTokenValid)
                         throw TokenInvalidException()
                     else
                         if (current == null)
                             ServiceFactory.DEF_SERVICE.getFollowers(arguments!!.getInt("id"),
-                                    UserManager.getAuthHeaderByToken())
+                                    UserHolder.getAuthHeaderByToken())
                         else
-                            ServiceFactory.DEF_SERVICE.getFollowers(UserManager.getAuthHeaderByToken(), current)
+                            ServiceFactory.DEF_SERVICE.getFollowers(UserHolder.getAuthHeaderByToken(), current)
                 }
-                .retryWhen(UserManager::retryForToken)
-                .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                .retryWhen(UserHolder::retryForToken)
+                .checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
@@ -247,17 +247,17 @@ class FollowingsRVFragment : BaseRVFragment() {
     override fun loadData(current: String?) {
         Flowable.just(1)
                 .flatMap {
-                    if (!UserManager.isSavedTokenValid)
+                    if (!UserHolder.isSavedTokenValid)
                         throw TokenInvalidException()
                     else
                         if (current == null)
                             ServiceFactory.DEF_SERVICE.getFolloweds(arguments!!.getInt("id"),
-                                    UserManager.getAuthHeaderByToken())
+                                    UserHolder.getAuthHeaderByToken())
                         else
-                            ServiceFactory.DEF_SERVICE.getFolloweds(UserManager.getAuthHeaderByToken(), current)
+                            ServiceFactory.DEF_SERVICE.getFolloweds(UserHolder.getAuthHeaderByToken(), current)
                 }
-                .retryWhen(UserManager::retryForToken)
-                .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                .retryWhen(UserHolder::retryForToken)
+                .checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
@@ -300,7 +300,7 @@ class UserPostsRVFragment : BaseRVFragment(), IPostFragment {
     override fun loadData(current: String?) {
         Flowable.just(1)
                 .flatMap {
-                    if (!UserManager.isSavedTokenValid)
+                    if (!UserHolder.isSavedTokenValid)
                         throw TokenInvalidException()
                     else
                         if (current == null)
@@ -308,8 +308,8 @@ class UserPostsRVFragment : BaseRVFragment(), IPostFragment {
                         else
                             ServiceFactory.DEF_SERVICE.getUserPosts(current)
                 }
-                .retryWhen(UserManager::retryForToken)
-                .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                .retryWhen(UserHolder::retryForToken)
+                .checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
