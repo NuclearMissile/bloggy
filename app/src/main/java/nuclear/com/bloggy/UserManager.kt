@@ -2,7 +2,6 @@ package nuclear.com.bloggy
 
 import android.content.Context
 import io.reactivex.Flowable
-import nuclear.com.bloggy.Entity.Token
 import nuclear.com.bloggy.Entity.User
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.UI.Activity.LogInActivity
@@ -80,8 +79,12 @@ object UserManager {
         return throwable.flatMap {
             if (it is TokenInvalidException) {
                 LogUtil.i(this, it.message)
-                ServiceFactory.DEF_SERVICE.getToken(getAuthHeaderByPassword())
-                        .doOnNext { saveToken(it.result) }
+                ServiceFactory.DEF_SERVICE
+                        .getToken(getAuthHeaderByPassword())
+                        .doOnNext {
+                            Settings.INSTANCE.AuthToken = it.result.token
+                            Settings.INSTANCE.TokenExpireAt = it.result.expireAt
+                        }
             } else
                 throw it
         }
@@ -91,11 +94,6 @@ object UserManager {
         if (isAnonymous)
             throw IllegalStateException("call getAuthHeaderByToken while self is anonymous")
         return OkHttpUtil.genAuthHeader(self!!.email, Settings.INSTANCE.Password!!)
-    }
-
-    private fun saveToken(token: Token) {
-        Settings.INSTANCE.AuthToken = token.token
-        Settings.INSTANCE.TokenExpireAt = token.expireAt
     }
 }
 

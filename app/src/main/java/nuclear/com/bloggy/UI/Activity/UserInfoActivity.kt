@@ -152,7 +152,6 @@ class UserInfoActivity : SwipeBackRxActivity() {
     }
 
     private fun onFollowUnfollowClick() {
-        Settings.INSTANCE.TokenExpireAt = -1
         follow_unfollow_btn_user_info.isEnabled = false
         Flowable.just(1)
                 .flatMap {
@@ -168,7 +167,12 @@ class UserInfoActivity : SwipeBackRxActivity() {
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    init()
+                    mFollowState.isFollowing = !mFollowState.isFollowing
+                    if (mFollowState.isFollowing) {
+                        follow_unfollow_btn_user_info.setText(resources.getString(R.string.unfollow_user_info))
+                    } else {
+                        follow_unfollow_btn_user_info.setText(resources.getString(R.string.follow_user_info))
+                    }
                 }, onError = {
                     LogUtil.e(this, it.message)
                     ToastUtil.showLongToast(it.message)

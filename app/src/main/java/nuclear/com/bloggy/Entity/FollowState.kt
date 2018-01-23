@@ -4,9 +4,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 
-/**
- * Created by torri on 2017/12/26.
- */
 data class FollowState constructor(
         // i isFollowing
         @SerializedName("is_following") var isFollowing: Boolean,
