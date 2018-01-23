@@ -28,6 +28,7 @@ import nuclear.com.bloggy.R
 import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
 import nuclear.com.bloggy.UserHolder
 import nuclear.com.bloggy.Util.*
+import nuclear.com.bloggy.handleError
 import okhttp3.RequestBody
 import java.util.*
 
@@ -196,17 +197,15 @@ class LogInActivity : SwipeBackRxActivity() {
         Handler().postDelayed({
             ServiceFactory.DEF_SERVICE
                     .login(OkHttpUtil.genAuthHeader(email, password))
-                    .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                    .checkApiError()
                     .defaultSchedulers()
                     .bindToLifecycle(this)
                     .subscribeBy(onNext = {
-                        UserHolder.login(it, password)
-                        LogUtil.i(this, "User(${it.username}, $${it.id}) log in success")
+                        UserHolder.login(it.result, password)
+                        LogUtil.i(this, "User(${it.result.username}, $${it.result.id}) log in success")
                         finish()
                     }, onError = {
-                        LogUtil.e(this, it.message)
-                        ToastUtil.showLongToast(it.message)
-                        it.printStackTrace()
+                        handleError(this, it)
                         closeDialog()
                     }, onComplete = { closeDialog() })
         }, DIALOG_DELAY)
@@ -222,17 +221,15 @@ class LogInActivity : SwipeBackRxActivity() {
         Handler().postDelayed({
             ServiceFactory.DEF_SERVICE
                     .register(requestBody)
-                    .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                    .checkApiError()
                     .bindToLifecycle(this)
                     .defaultSchedulers()
                     .subscribeBy(onNext = {
-                        UserHolder.login(it, password)
-                        LogUtil.i(this, "User(${it.username}, $${it.id}) sign up success")
+                        UserHolder.login(it.result, password)
+                        LogUtil.i(this, "User(${it.result.username}, $${it.result.id}) sign up success")
                         finish()
                     }, onError = {
-                        LogUtil.e(this, it.message)
-                        it.printStackTrace()
-                        ToastUtil.showLongToast(it.message)
+                        handleError(this, it)
                         closeDialog()
                     }, onComplete = { closeDialog() })
         }, DIALOG_DELAY)
@@ -244,18 +241,18 @@ class LogInActivity : SwipeBackRxActivity() {
         Handler().postDelayed({
             ServiceFactory.DEF_SERVICE
                     .resetPassword(email)
-                    .map { if (it.isSuccess) it else throw Exception(it.message) }
+                    .checkApiError()
                     .defaultSchedulers()
                     .bindToLifecycle(this)
                     .subscribeBy(onNext = {
                         ToastUtil.showShortToast(it.message)
                         LogUtil.i(this, it.message)
                     }, onError = {
-                        LogUtil.e(this, it.message)
-                        it.printStackTrace()
-                        ToastUtil.showLongToast(it.message)
+                        handleError(this, it)
                         closeDialog()
-                    }, onComplete = { closeDialog() })
+                    }, onComplete = {
+                        closeDialog()
+                    })
         }, DIALOG_DELAY)
     }
 }

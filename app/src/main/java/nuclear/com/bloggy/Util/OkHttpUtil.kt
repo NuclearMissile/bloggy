@@ -35,7 +35,7 @@ object OkHttpUtil {
     val INTERCEPTOR_LOGGING by lazy {
         val inter = HttpLoggingInterceptor()
         inter.level = if (Settings.INSTANCE.DebugMode)
-            HttpLoggingInterceptor.Level.BASIC else HttpLoggingInterceptor.Level.NONE
+            HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.BASIC
         inter
     }
 

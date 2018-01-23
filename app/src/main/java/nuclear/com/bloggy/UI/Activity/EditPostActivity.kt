@@ -20,6 +20,7 @@ import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
 import nuclear.com.bloggy.Util.LogUtil
 import nuclear.com.bloggy.Util.ToastUtil
+import nuclear.com.bloggy.Util.checkApiError
 import nuclear.com.bloggy.Util.defaultSchedulers
 import org.greenrobot.eventbus.EventBus
 import ru.noties.markwon.Markwon
@@ -55,22 +56,20 @@ class EditPostActivity : SwipeBackRxActivity() {
         fun tryStart(context: Context, postId: Int) {
             ServiceFactory.DEF_SERVICE
                     .getPostById(postId)
-                    .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                    .checkApiError()
                     .defaultSchedulers()
                     .subscribeBy(onNext = {
                         if (!UserHolder.can(Permission.WRITE)) {
                             UserHolder.handlePermissionError(context, Permission.WRITE)
-                        } else if (!UserHolder.isSelfById(it.authorId)) {
+                        } else if (!UserHolder.isSelfById(it.result.authorId)) {
                             LogUtil.w(this, "try to edit a post not by self")
                         } else {
                             val intent = Intent(context, EditPostActivity::class.java)
-                            intent.putExtra("oldPost", it)
+                            intent.putExtra("oldPost", it.result)
                             context.startActivity(intent)
                         }
                     }, onError = {
-                        LogUtil.e(this, it.message)
-                        ToastUtil.showLongToast(it.message)
-                        it.printStackTrace()
+                        handleError(this, it)
                     })
         }
     }
@@ -138,7 +137,7 @@ class EditPostActivity : SwipeBackRxActivity() {
         Flowable.just(1)
                 .flatMap {
                     if (!UserHolder.isSavedTokenValid)
-                        throw TokenInvalidException()
+                        throw TokenInvalidError()
                     else {
                         if (mOriginPost == null)
                             ServiceFactory.DEF_SERVICE
@@ -149,22 +148,20 @@ class EditPostActivity : SwipeBackRxActivity() {
                     }
                 }
                 .retryWhen(UserHolder::retryForToken)
-                .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                .checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
                     if (mOriginPost == null) {
-                        EventBus.getDefault().post(AddPostEvent(it))
+                        EventBus.getDefault().post(AddPostEvent(it.result))
                         ToastUtil.showShortToast("upload new post success")
                     } else {
-                        EventBus.getDefault().post(ChangePostEvent(mOriginPost!!, it))
+                        EventBus.getDefault().post(ChangePostEvent(mOriginPost!!, it.result))
                         ToastUtil.showShortToast("edit post success")
                     }
                     finish()
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 })
     }
 

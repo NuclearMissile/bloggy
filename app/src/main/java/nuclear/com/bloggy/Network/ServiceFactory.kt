@@ -28,12 +28,8 @@ class ServiceFactory private constructor() {
         var DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
             private set
 
-        fun refresh() {
+        fun reloadService() {
             DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
         }
-
-        /*val DEF_SERVICE by lazy {
-            ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
-        }*/
     }
 }

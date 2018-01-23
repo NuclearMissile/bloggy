@@ -77,7 +77,7 @@ object UserHolder {
 
     fun retryForToken(throwable: Flowable<Throwable>): Flowable<*> {
         return throwable.flatMap {
-            if (it is TokenInvalidException) {
+            if (it is TokenInvalidError) {
                 LogUtil.i(this, it.message)
                 ServiceFactory.DEF_SERVICE
                         .getToken(getAuthHeaderByPassword())
@@ -105,5 +105,3 @@ object Permission {
     val MODERATE = 16
     val ADMIN = 0xff
 }
-
-class TokenInvalidException(msg: String = "cached token invalid, may be expired, retry") : Exception(msg)

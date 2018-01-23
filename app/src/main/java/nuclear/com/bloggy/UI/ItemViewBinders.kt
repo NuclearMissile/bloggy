@@ -59,20 +59,18 @@ class PostViewBinder(private val context: Context) : ItemViewBinder<Post, PostVi
                                     Flowable.just(1)
                                             .flatMap {
                                                 if (!UserHolder.isSavedTokenValid)
-                                                    throw TokenInvalidException()
+                                                    throw TokenInvalidError()
                                                 else
                                                     ServiceFactory.DEF_SERVICE.deletePost(item.id, UserHolder.getAuthHeaderByToken())
                                             }
                                             .retryWhen(UserHolder::retryForToken)
-                                            .map { if (it.isSuccess) it else throw Exception(it.message) }
+                                            .checkApiError()
                                             .defaultSchedulers()
                                             .subscribeBy(onNext = {
                                                 EventBus.getDefault().post(RemovePostEvent(item))
                                                 ToastUtil.showShortToast(R.string.post_deleted)
                                             }, onError = {
-                                                LogUtil.e(this, it.message)
-                                                ToastUtil.showLongToast(it.message)
-                                                it.printStackTrace()
+                                                handleError(this, it)
                                             })
                                 }.show()
                         true
@@ -142,20 +140,18 @@ class CommentViewBinder(private val context: Context) : ItemViewBinder<Comment, 
                                     Flowable.just(1)
                                             .flatMap {
                                                 if (!UserHolder.isSavedTokenValid)
-                                                    throw TokenInvalidException()
+                                                    throw TokenInvalidError()
                                                 else
                                                     ServiceFactory.DEF_SERVICE.deleteComment(item.id, UserHolder.getAuthHeaderByToken())
                                             }
                                             .retryWhen(UserHolder::retryForToken)
-                                            .map { if (it.isSuccess) it else throw Exception(it.message) }
+                                            .checkApiError()
                                             .defaultSchedulers()
                                             .subscribeBy(onNext = {
                                                 EventBus.getDefault().post(RemoveCommentEvent(item))
                                                 ToastUtil.showShortToast(R.string.comment_deleted)
                                             }, onError = {
-                                                LogUtil.e(this, it.message)
-                                                ToastUtil.showLongToast(it.message)
-                                                it.printStackTrace()
+                                                handleError(this, it)
                                             })
                                 }.show()
                     }

@@ -4,11 +4,6 @@ import android.text.TextUtils
 import android.util.Log
 import nuclear.com.bloggy.Settings
 
-
-/**
- * Created by torri on 2017/10/10.
- */
-
 object LogUtil {
 
     private val DEBUG_FLAG

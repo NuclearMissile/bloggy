@@ -27,7 +27,10 @@ import nuclear.com.bloggy.UI.Fragment.IPostFragment
 import nuclear.com.bloggy.UI.PostViewBinder
 import nuclear.com.bloggy.UI.UserViewBinder
 import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
-import nuclear.com.bloggy.Util.*
+import nuclear.com.bloggy.Util.GlideOptions
+import nuclear.com.bloggy.Util.ShareUtil
+import nuclear.com.bloggy.Util.checkApiError
+import nuclear.com.bloggy.Util.defaultSchedulers
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -96,7 +99,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
         Flowable.concat(Flowable.just(1)
                 .flatMap {
                     if (!UserHolder.isSavedTokenValid)
-                        throw TokenInvalidException()
+                        throw TokenInvalidError()
                     ServiceFactory.DEF_SERVICE.getFollowState(mId, UserHolder.getAuthHeaderByToken())
                 }, ServiceFactory.DEF_SERVICE.getUserById(mId))
                 .retryWhen(UserHolder::retryForToken)
@@ -104,14 +107,12 @@ class UserInfoActivity : SwipeBackRxActivity() {
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    when (it) {
-                        is User -> mUser = it
-                        is FollowState -> mFollowState = it
+                    when (it.result) {
+                        is User -> mUser = it.result
+                        is FollowState -> mFollowState = it.result
                     }
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                     finish()
                 }, onComplete = {
                     syncUI()
@@ -156,14 +157,14 @@ class UserInfoActivity : SwipeBackRxActivity() {
         Flowable.just(1)
                 .flatMap {
                     if (!UserHolder.isSavedTokenValid)
-                        throw TokenInvalidException()
+                        throw TokenInvalidError()
                     if (mFollowState.isFollowing)
                         ServiceFactory.DEF_SERVICE.unfollowUser(mUser.id, UserHolder.getAuthHeaderByToken())
                     else
                         ServiceFactory.DEF_SERVICE.followUser(mUser.id, UserHolder.getAuthHeaderByToken())
                 }
                 .retryWhen(UserHolder::retryForToken)
-                .checkApiErrorN()
+                .checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
@@ -174,9 +175,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
                         follow_unfollow_btn_user_info.setText(resources.getString(R.string.follow_user_info))
                     }
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                     follow_unfollow_btn_user_info.isEnabled = true
                 }, onComplete = {
                     follow_unfollow_btn_user_info.isEnabled = true
@@ -209,13 +208,15 @@ class FollowedbysFragment : BaseRVFragment() {
         mAdapter.register(User::class.java, UserViewBinder(activity!!))
     }
 
+    override fun onNoMoreData() {}
+
     override fun onNoData() {}
 
     override fun loadData(current: String?) {
         Flowable.just(1)
                 .flatMap {
                     if (!UserHolder.isSavedTokenValid)
-                        throw TokenInvalidException()
+                        throw TokenInvalidError()
                     else
                         if (current == null)
                             ServiceFactory.DEF_SERVICE.getFollowers(arguments!!.getInt("id"),
@@ -228,11 +229,9 @@ class FollowedbysFragment : BaseRVFragment() {
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    onDataReceived(current, it.next, it.list)
+                    onDataReceived(current, it.result.next, it.result.list)
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 })
     }
 }
@@ -242,13 +241,15 @@ class FollowingsRVFragment : BaseRVFragment() {
         mAdapter.register(User::class.java, UserViewBinder(activity!!))
     }
 
+    override fun onNoMoreData() {}
+
     override fun onNoData() {}
 
     override fun loadData(current: String?) {
         Flowable.just(1)
                 .flatMap {
                     if (!UserHolder.isSavedTokenValid)
-                        throw TokenInvalidException()
+                        throw TokenInvalidError()
                     else
                         if (current == null)
                             ServiceFactory.DEF_SERVICE.getFolloweds(arguments!!.getInt("id"),
@@ -261,11 +262,9 @@ class FollowingsRVFragment : BaseRVFragment() {
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    onDataReceived(current, it.next, it.list)
+                    onDataReceived(current, it.result.next, it.result.list)
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 })
     }
 }
@@ -295,13 +294,15 @@ class UserPostsRVFragment : BaseRVFragment(), IPostFragment {
         mAdapter.register(Post::class.java, PostViewBinder(activity!!))
     }
 
+    override fun onNoMoreData() {}
+
     override fun onNoData() {}
 
     override fun loadData(current: String?) {
         Flowable.just(1)
                 .flatMap {
                     if (!UserHolder.isSavedTokenValid)
-                        throw TokenInvalidException()
+                        throw TokenInvalidError()
                     else
                         if (current == null)
                             ServiceFactory.DEF_SERVICE.getUserPosts(arguments!!.getInt("id"))
@@ -313,11 +314,9 @@ class UserPostsRVFragment : BaseRVFragment(), IPostFragment {
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    onDataReceived(current, it.next, it.list)
+                    onDataReceived(current, it.result.next, it.result.list)
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 })
     }
 }

@@ -26,10 +26,7 @@ import nuclear.com.bloggy.UI.Fragment.BaseRVFragment
 import nuclear.com.bloggy.UI.PostContentViewBinder
 import nuclear.com.bloggy.UI.UserViewBinder
 import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
-import nuclear.com.bloggy.Util.LogUtil
-import nuclear.com.bloggy.Util.ShareUtil
-import nuclear.com.bloggy.Util.ToastUtil
-import nuclear.com.bloggy.Util.defaultSchedulers
+import nuclear.com.bloggy.Util.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -45,16 +42,14 @@ class PostActivity : SwipeBackRxActivity() {
         fun tryStart(context: Context, postId: Int) {
             ServiceFactory.DEF_SERVICE
                     .getPostById(postId)
-                    .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                    .checkApiError()
                     .defaultSchedulers()
                     .subscribeBy(onNext = {
                         val intent = Intent(context, PostActivity::class.java)
-                        intent.putExtra("post", it)
+                        intent.putExtra("post", it.result)
                         context.startActivity(intent)
                     }, onError = {
-                        LogUtil.e(this, it.message)
-                        ToastUtil.showLongToast(it.message)
-                        it.printStackTrace()
+                        handleError(this, it)
                     })
         }
     }
@@ -96,22 +91,20 @@ class PostActivity : SwipeBackRxActivity() {
                             Flowable.just(1)
                                     .flatMap {
                                         if (!UserHolder.isSavedTokenValid)
-                                            throw TokenInvalidException()
+                                            throw TokenInvalidError()
                                         else
                                             ServiceFactory.DEF_SERVICE.newComment(mPost.id, NewArticle(met.text.toString()),
                                                     UserHolder.getAuthHeaderByToken())
                                     }
                                     .retryWhen(UserHolder::retryForToken)
-                                    .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                                    .checkApiError()
                                     .bindToLifecycle(this)
                                     .defaultSchedulers()
                                     .subscribeBy(onNext = {
-                                        EventBus.getDefault().post(AddCommentEvent(it))
+                                        EventBus.getDefault().post(AddCommentEvent(it.result))
                                         dialog.dismiss()
                                     }, onError = {
-                                        LogUtil.e(this, it.message)
-                                        ToastUtil.showLongToast(it.message)
-                                        it.printStackTrace()
+                                        handleError(this, it)
                                     })
                         })
                         .show()
@@ -123,12 +116,12 @@ class PostActivity : SwipeBackRxActivity() {
         Flowable.just(1)
                 .flatMap {
                     if (!UserHolder.isSavedTokenValid)
-                        throw TokenInvalidException()
+                        throw TokenInvalidError()
                     else
                         ServiceFactory.DEF_SERVICE.deletePost(mPost.id, UserHolder.getAuthHeaderByToken())
                 }
                 .retryWhen(UserHolder::retryForToken)
-                .map { if (it.isSuccess) it else throw Exception(it.message) }
+                .checkApiError()
                 .defaultSchedulers()
                 .bindToLifecycle(this)
                 .subscribeBy(onNext = {
@@ -136,9 +129,7 @@ class PostActivity : SwipeBackRxActivity() {
                     ToastUtil.showShortToast(R.string.post_deleted)
                     finish()
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 })
     }
 
@@ -272,31 +263,27 @@ class PostMarkDownFragment : BaseRVFragment() {
     override fun reload() {
         ServiceFactory.DEF_SERVICE
                 .getPostById(mPost.id)
-                .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                .checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    changeItem(mPost, it)
+                    changeItem(mPost, it.result)
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 })
     }
 
     override fun loadData(current: String?) {
         ServiceFactory.DEF_SERVICE
                 .getUserById(mPost.authorId)
-                .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                .checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    addItem(it)
+                    addItem(it.result)
                     addItem(mPost, false)
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 })
     }
 }
@@ -334,15 +321,13 @@ class CommentFragment : BaseRVFragment() {
     override fun loadData(current: String?) {
         ServiceFactory.DEF_SERVICE
                 .getPostComments(mPost.id)
-                .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                .checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    onDataReceived(current, it.next, it.list)
+                    onDataReceived(current, it.result.next, it.result.list)
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 })
     }
 }

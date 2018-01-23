@@ -35,10 +35,7 @@ import nuclear.com.bloggy.UI.DraftViewBinder
 import nuclear.com.bloggy.UI.Fragment.BaseRVFragment
 import nuclear.com.bloggy.UI.Fragment.IPostFragment
 import nuclear.com.bloggy.UI.PostViewBinder
-import nuclear.com.bloggy.Util.GlideOptions
-import nuclear.com.bloggy.Util.LogUtil
-import nuclear.com.bloggy.Util.ToastUtil
-import nuclear.com.bloggy.Util.defaultSchedulers
+import nuclear.com.bloggy.Util.*
 import nuclear.com.swipeback.activity.SwipeBackActivity
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -293,9 +290,7 @@ class DraftFragment : BaseRVFragment() {
                 .subscribeBy(onNext = {
                     drafts.add(it)
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 }, onComplete = {
                     mItems.clear()
                     mItems.addAll(drafts.sortedByDescending { it.timeStamp })
@@ -348,15 +343,13 @@ class FavoriteFragment : BaseRVFragment(), IPostFragment {
         allFavorite.toFlowable()
                 .flatMap { ServiceFactory.DEF_SERVICE.getPostById(it.postId) }
                 .filter { it.statusCode != 404 }
-                .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                .checkApiError()
                 .defaultSchedulers()
                 .bindToLifecycle(this)
                 .subscribeBy(onNext = {
-                    posts.add(it)
+                    posts.add(it.result)
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 }, onComplete = {
                     BaseApplication.favoritePostBox.remove(allFavorite.filter { it.postId !in posts.map { it.id } })
                     mItems.clear()
@@ -395,22 +388,20 @@ class TimelineRVFragment : BaseRVFragment(), IPostFragment {
         Flowable.just(1)
                 .flatMap {
                     if (!UserHolder.isSavedTokenValid)
-                        throw TokenInvalidException("cached token is invalid")
+                        throw TokenInvalidError()
                     if (current == null)
                         ServiceFactory.DEF_SERVICE.getTimeline(UserHolder.getAuthHeaderByToken())
                     else
                         ServiceFactory.DEF_SERVICE.getTimeline(UserHolder.getAuthHeaderByToken(), current)
                 }
                 .retryWhen(UserHolder::retryForToken)
-                .map { if (it.isSuccess) it.result else throw Exception(it.message) }
+                .checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    onDataReceived(current, it.next, it.list)
+                    onDataReceived(current, it.result.next, it.result.list)
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 })
     }
 }
@@ -445,15 +436,13 @@ class PostsRVFragment : BaseRVFragment(), IPostFragment {
             ServiceFactory.DEF_SERVICE.getAllPosts()
         else
             ServiceFactory.DEF_SERVICE.getAllPosts(current)
-        service.map { if (it.isSuccess) it.result else throw Exception(it.message) }
+        service.checkApiError()
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    onDataReceived(current, it.next, it.list)
+                    onDataReceived(current, it.result.next, it.result.list)
                 }, onError = {
-                    LogUtil.e(this, it.message)
-                    ToastUtil.showLongToast(it.message)
-                    it.printStackTrace()
+                    handleError(this, it)
                 })
     }
 }

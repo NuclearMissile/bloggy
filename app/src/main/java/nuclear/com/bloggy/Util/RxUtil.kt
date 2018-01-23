@@ -6,7 +6,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import nuclear.com.bloggy.Entity.NoResultWrapper
+import nuclear.com.bloggy.*
 import nuclear.com.bloggy.Entity.ResultWrapper
 
 fun <T> Observable<T>.allIOSchedulers(): Observable<T> = subscribeOn(Schedulers.io()).observeOn(Schedulers.io())
@@ -21,21 +21,18 @@ fun <T> Flowable<T>.defaultSchedulers(): Flowable<T> = subscribeOn(Schedulers.io
 
 fun <T> Flowable<T>.computeSchedulers(): Flowable<T> = subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread())
 
-fun Flowable<NoResultWrapper>.checkApiErrorN(): Flowable<NoResultWrapper> {
+fun <T> Flowable<ResultWrapper<T>>.checkApiError(): Flowable<ResultWrapper<T>> {
     return this.map {
         if (it.isSuccess)
             it
         else
-            throw Exception()
-    }
-}
-
-fun <T> Flowable<ResultWrapper<T>>.checkApiError(): Flowable<T> {
-    return this.map {
-        if (it.isSuccess)
-            it.result
-        else
-            throw Exception()
+            when (it.statusCode) {
+                400 -> throw ApiBadRequestError(it.message)
+                401 -> throw ApiAuthError(it.message)
+                403 -> throw ApiForbiddenError(it.message)
+                404 -> throw ApiNotFoundError(it.message)
+                else -> throw ApiUnknownError(it.message)
+            }
     }
 }
 
