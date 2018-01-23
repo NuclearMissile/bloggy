@@ -27,8 +27,6 @@ class BaseApplication : Application() {
         boxStore = MyObjectBox.builder().androidContext(this).build()
         favoritePostBox = boxStore.boxFor(FavoritePost::class.java)
         draftBox = boxStore.boxFor(NewArticle::class.java)
-
-        Settings.INSTANCE.BaseUrl = "http://192.168.43.201:5000/api/v1.0/"
         UserManager.resume()
     }
 

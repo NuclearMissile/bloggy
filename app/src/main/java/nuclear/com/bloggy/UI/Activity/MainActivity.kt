@@ -198,6 +198,7 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_settings -> {
+                SettingsActivity.tryStart(this)
                 true
             }
             else -> super.onOptionsItemSelected(item)

@@ -1,6 +1,5 @@
 package nuclear.com.bloggy.UI.Activity
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -59,15 +58,15 @@ class UserInfoActivity : SwipeBackRxActivity() {
         mId = intent.getIntExtra("id", -1)
         if (mId == -1)
             throw IllegalArgumentException("illegal id received")
+        initViewPager()
     }
 
-    @SuppressLint("MissingSuperCall")
-    override fun onResume() {
+    override fun onStart() {
         if (UserManager.isAnonymous)
             finish()
         else
-            syncState()
-        super.onResume()
+            init()
+        super.onStart()
     }
 
     private fun initViewPager() {
@@ -93,7 +92,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
         }
     }
 
-    private fun syncState() {
+    private fun init() {
         Flowable.concat(Flowable.just(1)
                 .flatMap {
                     if (!UserManager.isSavedTokenValid)
@@ -115,12 +114,11 @@ class UserInfoActivity : SwipeBackRxActivity() {
                     it.printStackTrace()
                     finish()
                 }, onComplete = {
-                    initViewPager()
-                    syncUIState()
+                    syncUI()
                 })
     }
 
-    private fun syncUIState() {
+    private fun syncUI() {
         var toolbarTitle = mUser.username
         if (UserManager.isSelfById(mUser.id)) {
             follow_unfollow_btn_user_info.visibility = View.GONE
@@ -170,7 +168,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
                 .bindToLifecycle(this)
                 .defaultSchedulers()
                 .subscribeBy(onNext = {
-                    syncState()
+                    init()
                 }, onError = {
                     LogUtil.e(this, it.message)
                     ToastUtil.showLongToast(it.message)

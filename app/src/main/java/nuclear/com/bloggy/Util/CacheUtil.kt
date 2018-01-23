@@ -21,7 +21,7 @@ fun formatSize(size: Long, SIFlag: Boolean = false): String {
         return "$size B"
     val exp = (Math.log10(size.toDouble()) / Math.log10(unit.toDouble())).toInt()
     val pre = (if (SIFlag) "kMGTPE" else "KMGTPE")[exp - 1] 
-    return String.format("%.2f %sB", size / Math.pow(unit.toDouble(), exp.toDouble()), pre)
+    return String.format("%.1f %sB", size / Math.pow(unit.toDouble(), exp.toDouble()), pre)
 }
 
 fun clearAllCache(context: Context) {
