@@ -27,10 +27,7 @@ import nuclear.com.bloggy.UI.Fragment.IPostFragment
 import nuclear.com.bloggy.UI.PostViewBinder
 import nuclear.com.bloggy.UI.UserViewBinder
 import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
-import nuclear.com.bloggy.Util.GlideOptions
-import nuclear.com.bloggy.Util.ShareUtil
-import nuclear.com.bloggy.Util.checkApiError
-import nuclear.com.bloggy.Util.defaultSchedulers
+import nuclear.com.bloggy.Util.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -120,8 +117,11 @@ class UserInfoActivity : SwipeBackRxActivity() {
     }
 
     private fun syncUI() {
-        if (this.isDestroyed || this.isFinishing)
+        if (this.isDestroyed) {
+            LogUtil.w(this, "call syncUI while activity is destroyed")
             return
+        }
+
         var toolbarTitle = mUser.username
         if (UserHolder.isSelfById(mUser.id)) {
             follow_unfollow_btn_user_info.visibility = View.GONE
