@@ -120,6 +120,8 @@ class UserInfoActivity : SwipeBackRxActivity() {
     }
 
     private fun syncUI() {
+        if (this.isDestroyed || this.isFinishing)
+            return
         var toolbarTitle = mUser.username
         if (UserHolder.isSelfById(mUser.id)) {
             follow_unfollow_btn_user_info.visibility = View.GONE
@@ -128,7 +130,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
         } else {
             follow_unfollow_btn_user_info.visibility = View.VISIBLE
             if (mFollowState.isFollowedBy)
-                toolbarTitle += " [Now following me]"
+                toolbarTitle += " [Following Me]"
             if (mFollowState.isFollowing) {
                 follow_unfollow_btn_user_info.setText(resources.getString(R.string.unfollow_user_info))
             } else {
@@ -140,6 +142,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
             about_me_tv_user_info.visibility = View.GONE
         else
             about_me_tv_user_info.text = mUser.aboutMe
+
         Glide.with(this)
                 .load(UserHolder.getAvatarUrl(mUser.avatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
@@ -192,7 +195,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
         when (item.itemId) {
             android.R.id.home -> finish()
             R.id.action_share ->
-                ShareUtil.shareText(this, "Share self link...", UserHolder.self!!.userLink)
+                ShareUtil.shareText(this, "Share self link...", mUser.userLink)
             R.id.action_log_out -> {
                 UserHolder.logout()
                 finish()
