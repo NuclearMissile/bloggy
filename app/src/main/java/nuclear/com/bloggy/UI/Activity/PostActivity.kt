@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.widget.FrameLayout
 import com.afollestad.materialdialogs.MaterialDialog
 import com.rengwuxian.materialedittext.MaterialEditText
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity
 import com.trello.rxlifecycle2.kotlin.bindToLifecycle
 import io.reactivex.Flowable
 import io.reactivex.rxkotlin.subscribeBy
@@ -292,7 +293,7 @@ class CommentFragment : BaseRVFragment() {
     private lateinit var mPost: Post
 
     @Subscribe
-    fun onRemoveCommnet(event: RemoveCommentEvent) = removeItem(event.comment)
+    fun onRemoveComment(event: RemoveCommentEvent) = removeItem(event.comment)
 
     @Subscribe
     fun onAddComment(event: AddCommentEvent) = addItem(event.comment)
@@ -315,7 +316,7 @@ class CommentFragment : BaseRVFragment() {
     override fun onNoData() {}
 
     override fun regAdapter(mAdapter: MultiTypeAdapter) {
-        mAdapter.register(Comment::class.java, CommentViewBinder(activity!!))
+        mAdapter.register(Comment::class.java, CommentViewBinder(activity!!, this))
     }
 
     override fun loadData(current: String?) {

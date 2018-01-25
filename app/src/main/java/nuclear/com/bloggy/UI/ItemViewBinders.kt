@@ -12,6 +12,8 @@ import android.widget.TextView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.trello.rxlifecycle2.LifecycleProvider
+import com.trello.rxlifecycle2.kotlin.bindToLifecycle
 import io.reactivex.Flowable
 import io.reactivex.rxkotlin.subscribeBy
 import me.drakeet.multitype.ItemViewBinder
@@ -25,7 +27,8 @@ import nuclear.com.bloggy.Util.*
 import org.greenrobot.eventbus.EventBus
 import ru.noties.markwon.Markwon
 
-class PostViewBinder(private val context: Context) : ItemViewBinder<Post, PostViewBinder.ViewHolder>() {
+class PostViewBinder(private val context: Context, private val lifecycleProvider: LifecycleProvider<*>)
+    : ItemViewBinder<Post, PostViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: Post) {
         fun onLongClick(): Boolean {
             val favorite = BaseApplication.favoritePostBox.query()
@@ -64,6 +67,7 @@ class PostViewBinder(private val context: Context) : ItemViewBinder<Post, PostVi
                                                     ServiceFactory.DEF_SERVICE.deletePost(item.id, UserHolder.getAuthHeaderByToken())
                                             }
                                             .retryWhen(UserHolder::retryForToken)
+                                            .bindToLifecycle(lifecycleProvider)
                                             .checkApiError()
                                             .defaultSchedulers()
                                             .subscribeBy(onNext = {
@@ -120,7 +124,8 @@ class PostViewBinder(private val context: Context) : ItemViewBinder<Post, PostVi
     }
 }
 
-class CommentViewBinder(private val context: Context) : ItemViewBinder<Comment, CommentViewBinder.ViewHolder>() {
+class CommentViewBinder(private val context: Context, private val lifecycleProvider: LifecycleProvider<*>)
+    : ItemViewBinder<Comment, CommentViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: Comment) {
         fun onLongClick(): Boolean {
             if (!UserHolder.isAdmin && !UserHolder.isSelfById(item.authorId))
@@ -145,6 +150,7 @@ class CommentViewBinder(private val context: Context) : ItemViewBinder<Comment, 
                                                     ServiceFactory.DEF_SERVICE.deleteComment(item.id, UserHolder.getAuthHeaderByToken())
                                             }
                                             .retryWhen(UserHolder::retryForToken)
+                                            .bindToLifecycle(lifecycleProvider)
                                             .checkApiError()
                                             .defaultSchedulers()
                                             .subscribeBy(onNext = {

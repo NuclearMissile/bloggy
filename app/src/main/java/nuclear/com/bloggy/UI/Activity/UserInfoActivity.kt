@@ -294,7 +294,7 @@ class UserPostsRVFragment : BaseRVFragment(), IPostFragment {
     }
 
     override fun regAdapter(mAdapter: MultiTypeAdapter) {
-        mAdapter.register(Post::class.java, PostViewBinder(activity!!))
+        mAdapter.register(Post::class.java, PostViewBinder(activity!!, this))
     }
 
     override fun onNoMoreData() {}

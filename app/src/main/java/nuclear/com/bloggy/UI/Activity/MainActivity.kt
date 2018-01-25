@@ -334,7 +334,7 @@ class FavoriteFragment : BaseRVFragment(), IPostFragment {
     }
 
     override fun regAdapter(mAdapter: MultiTypeAdapter) {
-        mAdapter.register(Post::class.java, PostViewBinder(this.activity!!))
+        mAdapter.register(Post::class.java, PostViewBinder(this.activity!!, this))
     }
 
     override fun loadData(current: String?) {
@@ -371,7 +371,7 @@ class TimelineRVFragment : BaseRVFragment(), IPostFragment {
     override fun onUpdatePost(changeEvent: ChangePostEvent) = changeItem(changeEvent.oldPost, changeEvent.newPost)
 
     override fun regAdapter(mAdapter: MultiTypeAdapter) {
-        mAdapter.register(Post::class.java, PostViewBinder(this.activity!!))
+        mAdapter.register(Post::class.java, PostViewBinder(this.activity!!, this))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -418,7 +418,7 @@ class PostsRVFragment : BaseRVFragment(), IPostFragment {
     override fun onUpdatePost(changeEvent: ChangePostEvent) = changeItem(changeEvent.oldPost, changeEvent.newPost)
 
     override fun regAdapter(mAdapter: MultiTypeAdapter) {
-        mAdapter.register(Post::class.java, PostViewBinder(activity!!))
+        mAdapter.register(Post::class.java, PostViewBinder(activity!!, this))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
