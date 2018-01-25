@@ -94,7 +94,7 @@ class PostViewBinder(private val context: Context) : ItemViewBinder<Post, PostVi
         Markwon.setMarkdown(holder.bodyTV, item.body)
         holder.timestampTV.text = DateUtil.getFriendlyTime(item.timeStamp)
         Glide.with(context)
-                .load(UserHolder.getAvatarUrl(item.authorAvatarHash, 120))
+                .load(UserHolder.getAvatarUrl(item.avatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)
@@ -162,7 +162,7 @@ class CommentViewBinder(private val context: Context) : ItemViewBinder<Comment, 
         }
 
         Glide.with(context)
-                .load(UserHolder.getAvatarUrl(item.authorAvatarHash, 60))
+                .load(UserHolder.getAvatarUrl(item.avatarHash, 60))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)

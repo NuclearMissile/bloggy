@@ -10,7 +10,7 @@ data class Comment constructor(
         @SerializedName("author_id") val authorId: Int,
         @SerializedName("body_html") val htmlBody: String,
         @SerializedName("timestamp") val timeStamp: Long,
-        @SerializedName("author_avatar_hash") val authorAvatarHash: String,
+        @SerializedName("avatar_hash") val avatarHash: String,
         @SerializedName("author_name") val authorName: String
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
@@ -31,7 +31,7 @@ data class Comment constructor(
         parcel.writeInt(authorId)
         parcel.writeString(htmlBody)
         parcel.writeLong(timeStamp)
-        parcel.writeString(authorAvatarHash)
+        parcel.writeString(avatarHash)
         parcel.writeString(authorName)
     }
 

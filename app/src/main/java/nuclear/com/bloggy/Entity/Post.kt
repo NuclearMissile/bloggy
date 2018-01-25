@@ -13,7 +13,7 @@ data class Post constructor(
         @SerializedName("timestamp") val timeStamp: Long,
         @SerializedName("author_id") val authorId: Int,
         @SerializedName("comments_count") val commentsCount: Int,
-        @SerializedName("author_avatar_hash") val authorAvatarHash: String,
+        @SerializedName("avatar_hash") val avatarHash: String,
         @SerializedName("author_name") val authorName: String,
         @SerializedName("post_link") val link: String
 ) : Parcelable {
@@ -35,7 +35,7 @@ data class Post constructor(
         parcel.writeLong(timeStamp)
         parcel.writeInt(authorId)
         parcel.writeInt(commentsCount)
-        parcel.writeString(authorAvatarHash)
+        parcel.writeString(avatarHash)
         parcel.writeString(authorName)
         parcel.writeString(link)
     }
