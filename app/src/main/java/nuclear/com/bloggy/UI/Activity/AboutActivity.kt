@@ -17,8 +17,6 @@ import nuclear.com.swipeback.activity.ISwipeBackActivity
 import nuclear.com.swipeback.activity.SwipeBackActivityHelper
 import me.drakeet.support.about.License
 
-
-
 class AboutActivity : AbsAboutActivity(), ISwipeBackActivity {
     companion object {
         fun tryStart(context: Context) {
