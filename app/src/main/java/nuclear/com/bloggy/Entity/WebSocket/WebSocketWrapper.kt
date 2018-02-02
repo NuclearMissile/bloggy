@@ -6,16 +6,14 @@ enum class MessageType(val index: Int) {
     NOTIFICATION(0),
     BE_FOLLOWED(1),
     MAIL_RECEIVED(2),
-    NEW_COMMENT(3),
-    NEW_POST(4),
-    COMMENT_BE_DELETED(5),
-    POST_BE_DELETED(6),
+    COMMENT_ADDED(3),
+    POST_ADDED(4),
 }
 
 
-data class WebSocketWrapper<out T>(val uuid: String,
-                                   @SerializedName("is_binary") val isBinary: Boolean,
-                                   @SerializedName("timestamp") val timeStamp: Long,
-                                   @SerializedName("msg_from") val msgFrom: Int,
-                                   @SerializedName("msg_type") val msgType: MessageType,
-                                   val payload: T)
+data class WebSocketWrapper(val uuid: String,
+                            @SerializedName("is_binary") val isBinary: Boolean,
+                            @SerializedName("timestamp") val timeStamp: Long,
+                            @SerializedName("msg_from") val msgFrom: Int,
+                            @SerializedName("msg_type") val msgType: MessageType,
+                            val payload: String)
