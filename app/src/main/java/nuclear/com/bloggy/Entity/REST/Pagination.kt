@@ -1,4 +1,4 @@
-package nuclear.com.bloggy.Entity
+package nuclear.com.bloggy.Entity.REST
 
 /**
  * Created by torri on 2017/12/8.

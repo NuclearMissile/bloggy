@@ -28,8 +28,8 @@ import io.reactivex.rxkotlin.toFlowable
 import kotlinx.android.synthetic.main.activity_main.*
 import me.drakeet.multitype.MultiTypeAdapter
 import nuclear.com.bloggy.*
-import nuclear.com.bloggy.Entity.NewArticle
-import nuclear.com.bloggy.Entity.Post
+import nuclear.com.bloggy.Entity.REST.NewArticle
+import nuclear.com.bloggy.Entity.REST.Post
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.UI.DraftViewBinder
 import nuclear.com.bloggy.UI.Fragment.BaseRVFragment

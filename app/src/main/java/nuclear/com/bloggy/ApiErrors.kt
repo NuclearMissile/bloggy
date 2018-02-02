@@ -16,9 +16,8 @@ class ApiBadRequestError(msg: String) : Exception(msg)
 class TokenInvalidError(msg: String = "cached token invalid, may be expired, retry") : Exception(msg)
 
 fun handleError(o: Any, throwable: Throwable) {
-    if (Settings.INSTANCE.DebugMode) {
-        LogUtil.e(o, throwable.message)
+    if (Settings.INSTANCE.DebugMode)
         throwable.printStackTrace()
-    }
+    LogUtil.e(o, throwable.message)
     ToastUtil.showLongToast(throwable.message)
 }

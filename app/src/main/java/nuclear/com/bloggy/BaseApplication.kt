@@ -4,9 +4,9 @@ import android.app.Application
 import android.os.Environment
 import io.objectbox.Box
 import io.objectbox.BoxStore
-import nuclear.com.bloggy.Entity.FavoritePost
+import nuclear.com.bloggy.Entity.REST.FavoritePost
 import nuclear.com.bloggy.Entity.MyObjectBox
-import nuclear.com.bloggy.Entity.NewArticle
+import nuclear.com.bloggy.Entity.REST.NewArticle
 import java.io.File
 
 class BaseApplication : Application() {

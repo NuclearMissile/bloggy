@@ -1,9 +1,9 @@
 package nuclear.com.bloggy
 
-import nuclear.com.bloggy.Entity.Comment
-import nuclear.com.bloggy.Entity.FavoritePost
-import nuclear.com.bloggy.Entity.NewArticle
-import nuclear.com.bloggy.Entity.Post
+import nuclear.com.bloggy.Entity.REST.Comment
+import nuclear.com.bloggy.Entity.REST.FavoritePost
+import nuclear.com.bloggy.Entity.REST.NewArticle
+import nuclear.com.bloggy.Entity.REST.Post
 
 data class AddPostEvent(val post: Post)
 

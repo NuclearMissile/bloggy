@@ -1,7 +1,7 @@
 package nuclear.com.bloggy.Network
 
 import io.reactivex.Flowable
-import nuclear.com.bloggy.Entity.*
+import nuclear.com.bloggy.Entity.REST.*
 import okhttp3.RequestBody
 import retrofit2.http.*
 

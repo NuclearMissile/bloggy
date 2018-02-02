@@ -2,7 +2,7 @@ package nuclear.com.bloggy
 
 import android.preference.PreferenceManager
 import com.google.gson.Gson
-import nuclear.com.bloggy.Entity.User
+import nuclear.com.bloggy.Entity.REST.User
 import nuclear.com.bloggy.Util.EncryptSharedPreference
 import nuclear.com.bloggy.Util.LogUtil
 

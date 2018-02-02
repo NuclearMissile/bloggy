@@ -7,7 +7,7 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import nuclear.com.bloggy.*
-import nuclear.com.bloggy.Entity.ResultWrapper
+import nuclear.com.bloggy.Entity.REST.ResultWrapper
 
 fun <T> Observable<T>.allIOSchedulers(): Observable<T> = subscribeOn(Schedulers.io()).observeOn(Schedulers.io())
 

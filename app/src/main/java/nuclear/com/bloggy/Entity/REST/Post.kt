@@ -1,4 +1,4 @@
-package nuclear.com.bloggy.Entity
+package nuclear.com.bloggy.Entity.REST
 
 import android.os.Parcel
 import android.os.Parcelable

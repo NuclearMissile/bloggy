@@ -19,6 +19,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import me.drakeet.multitype.ItemViewBinder
 import nuclear.com.bloggy.*
 import nuclear.com.bloggy.Entity.*
+import nuclear.com.bloggy.Entity.REST.*
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.UI.Activity.EditPostActivity
 import nuclear.com.bloggy.UI.Activity.PostActivity

@@ -2,12 +2,13 @@ package nuclear.com.bloggy
 
 import android.content.Context
 import io.reactivex.Flowable
-import nuclear.com.bloggy.Entity.User
+import nuclear.com.bloggy.Entity.REST.User
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.UI.Activity.LogInActivity
 import nuclear.com.bloggy.Util.DateUtil
 import nuclear.com.bloggy.Util.LogUtil
 import nuclear.com.bloggy.Util.OkHttpUtil
+import nuclear.com.bloggy.Util.checkApiError
 
 object UserHolder {
     @Volatile
@@ -81,6 +82,7 @@ object UserHolder {
                 LogUtil.i(this, it.message)
                 ServiceFactory.DEF_SERVICE
                         .getToken(getAuthHeaderByPassword())
+                        .checkApiError()
                         .doOnNext {
                             Settings.INSTANCE.AuthToken = it.result.token
                             Settings.INSTANCE.TokenExpireAt = it.result.expireAt

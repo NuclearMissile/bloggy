@@ -22,7 +22,7 @@ import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.input_fields_login.*
 import kotlinx.android.synthetic.main.title_login.*
-import nuclear.com.bloggy.Entity.NewUser
+import nuclear.com.bloggy.Entity.REST.NewUser
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.R
 import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity

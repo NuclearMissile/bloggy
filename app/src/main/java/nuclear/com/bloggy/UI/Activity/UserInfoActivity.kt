@@ -18,9 +18,9 @@ import kotlinx.android.synthetic.main.activity_user_info.*
 import kotlinx.android.synthetic.main.header_user_info.*
 import me.drakeet.multitype.MultiTypeAdapter
 import nuclear.com.bloggy.*
-import nuclear.com.bloggy.Entity.FollowState
-import nuclear.com.bloggy.Entity.Post
-import nuclear.com.bloggy.Entity.User
+import nuclear.com.bloggy.Entity.REST.FollowState
+import nuclear.com.bloggy.Entity.REST.Post
+import nuclear.com.bloggy.Entity.REST.User
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.UI.Fragment.BaseRVFragment
 import nuclear.com.bloggy.UI.Fragment.IPostFragment
