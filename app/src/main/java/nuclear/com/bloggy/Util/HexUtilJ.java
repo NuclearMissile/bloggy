@@ -16,12 +16,13 @@ public class HexUtilJ {
         if (bytes.size() == 0)
             return null;
         StringBuilder sb = new StringBuilder(bytes.size() << 1);
-        bytes.forEach(b -> sb.append(HEXES.charAt(b & 0xF0 >> 4)).append(HEXES.charAt(b & 0x0F)));
+        for (byte b : bytes)
+            sb.append(HEXES.charAt(b & 0xF0 >> 4)).append(HEXES.charAt(b & 0x0F));
         return sb.toString();
     }
 
     @Nullable
-    public static ArrayList<Byte> hex2Bytes(@NotNull String hex) {
+    public static Collection<Byte> hex2Bytes(@NotNull String hex) {
         if (TextUtils.isEmpty(hex) || hex.length() < 2)
             return null;
         String hexString = hex.toUpperCase();

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 
 object OkHttpUtil {
-    private val DEF_TIMEOUT: Long = 5
+    private const val DEF_TIMEOUT: Long = 3
 
     val INTERCEPTOR_FORCE_NETWORK: Interceptor by lazy {
         Interceptor { chain ->
@@ -78,9 +78,9 @@ object OkHttpUtil {
         }
     }
 
-    fun genAuthHeader(token: String) = Credentials.basic(token, "")
+    fun genAuthHeader(token: String): String = Credentials.basic(token, "")
 
-    fun genAuthHeader(email: String, password: String) = Credentials.basic(email, password)
+    fun genAuthHeader(email: String, password: String): String = Credentials.basic(email, password)
 
     fun genAuthInterceptor(username: String, password: String): Interceptor {
         if (!TextUtils.isEmpty(username) and !TextUtils.isEmpty(password))
