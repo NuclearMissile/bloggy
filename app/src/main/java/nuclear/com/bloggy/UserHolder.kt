@@ -11,8 +11,8 @@ import nuclear.com.bloggy.Util.OkHttpUtil
 import nuclear.com.bloggy.Util.checkApiError
 
 object UserHolder {
-    @Volatile
     var currUser: User? = null
+        @Synchronized
         private set
     val isAnonymous
         get() = currUser == null
@@ -21,11 +21,8 @@ object UserHolder {
     val isAdmin
         get() = can(Permission.ADMIN)
     val isSavedTokenValid: Boolean
-        get() {
-            synchronized(this, {
-                return Settings.INSTANCE.TokenExpireAt > DateUtil.TimeStamp + 30000 && Settings.INSTANCE.AuthToken != null
-            })
-        }
+        @Synchronized
+        get() = Settings.INSTANCE.TokenExpireAt > DateUtil.TimeStamp + 30000 && Settings.INSTANCE.AuthToken != null
 
     fun isSelfById(id: Int): Boolean {
         currUser ?: return false
@@ -80,25 +77,24 @@ object UserHolder {
         return OkHttpUtil.genAuthHeader(Settings.INSTANCE.AuthToken!!)
     }
 
+    @Synchronized
     fun retryForToken(throwable: Flowable<Throwable>): Flowable<Any> {
-        synchronized(this, {
-            return throwable.flatMap {
-                if (it is TokenInvalidError && isSavedTokenValid) {
-                    LogUtil.w(this, "token is already valid.")
-                    Flowable.just(0)
-                } else if (it is TokenInvalidError) {
-                    LogUtil.i(this, it.message)
-                    ServiceFactory.DEF_SERVICE
-                            .getToken(getAuthHeaderByPassword())
-                            .checkApiError()
-                            .doOnNext {
-                                Settings.INSTANCE.AuthToken = it.result.token
-                                Settings.INSTANCE.TokenExpireAt = it.result.expireAt
-                            }
-                } else
-                    throw it
-            }
-        })
+        return throwable.flatMap {
+            if (it is TokenInvalidError && isSavedTokenValid) {
+                LogUtil.i(this, "token is valid.")
+                Flowable.just(0)
+            } else if (it is TokenInvalidError) {
+                LogUtil.i(this, it.message)
+                ServiceFactory.DEF_SERVICE
+                        .getToken(getAuthHeaderByPassword())
+                        .checkApiError()
+                        .doOnNext {
+                            Settings.INSTANCE.AuthToken = it.result.token
+                            Settings.INSTANCE.TokenExpireAt = it.result.expireAt
+                        }
+            } else
+                throw it
+        }
     }
 
     private fun getAuthHeaderByPassword(): String {
