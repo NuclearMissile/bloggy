@@ -25,14 +25,14 @@ import kotlinx.android.synthetic.main.title_login.*
 import nuclear.com.bloggy.Entity.REST.NewUser
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.R
-import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
+import nuclear.com.bloggy.UI.Widget.RxSwipeBackActivity
 import nuclear.com.bloggy.UserHolder
 import nuclear.com.bloggy.Util.*
 import nuclear.com.bloggy.handleError
 import okhttp3.RequestBody
 import java.util.*
 
-class LogInActivity : SwipeBackRxActivity() {
+class LogInActivity : RxSwipeBackActivity() {
 
     companion object {
         fun tryStart(context: Context) {

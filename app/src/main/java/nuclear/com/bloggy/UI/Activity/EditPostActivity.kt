@@ -17,7 +17,7 @@ import nuclear.com.bloggy.*
 import nuclear.com.bloggy.Entity.REST.NewArticle
 import nuclear.com.bloggy.Entity.REST.Post
 import nuclear.com.bloggy.Network.ServiceFactory
-import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
+import nuclear.com.bloggy.UI.Widget.RxSwipeBackActivity
 import nuclear.com.bloggy.Util.LogUtil
 import nuclear.com.bloggy.Util.ToastUtil
 import nuclear.com.bloggy.Util.checkApiError
@@ -25,7 +25,7 @@ import nuclear.com.bloggy.Util.defaultSchedulers
 import org.greenrobot.eventbus.EventBus
 import ru.noties.markwon.Markwon
 
-class EditPostActivity : SwipeBackRxActivity() {
+class EditPostActivity : RxSwipeBackActivity() {
     private var mOriginPost: Post? = null
     private var mCurrentText = ""
     private var mOriginText = ""
@@ -62,7 +62,7 @@ class EditPostActivity : SwipeBackRxActivity() {
                         if (!UserHolder.can(Permission.WRITE)) {
                             UserHolder.handlePermissionError(context, Permission.WRITE)
                         } else if (!UserHolder.isSelfById(it.result.authorId)) {
-                            LogUtil.w(this, "try to edit a post not by self")
+                            LogUtil.w(this, "try to edit a post not by currUser")
                         } else {
                             val intent = Intent(context, EditPostActivity::class.java)
                             intent.putExtra("oldPost", it.result)

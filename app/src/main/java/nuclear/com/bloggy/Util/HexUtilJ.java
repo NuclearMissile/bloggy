@@ -6,23 +6,32 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 public class HexUtilJ {
     private static final String HEXES = "0123456789ABCDEF";
 
     @Nullable
-    public static String bytes2Hex(@NotNull Collection<Byte> bytes) {
-        if (bytes.size() == 0)
+    public static String bytes2Hex(@NotNull List<Byte> bytes) {
+        int s = bytes.size();
+        if (s == 0)
             return null;
-        StringBuilder sb = new StringBuilder(bytes.size() << 1);
-        for (byte b : bytes)
-            sb.append(HEXES.charAt(b & 0xF0 >> 4)).append(HEXES.charAt(b & 0x0F));
+        StringBuilder sb = new StringBuilder(s << 1);
+        int i = 0;
+        while (i <= s - 4) {
+            sb.append(HEXES.charAt(bytes.get(i) & 0xF0 >> 4)).append(HEXES.charAt(bytes.get(i) & 0x0F))
+                    .append(HEXES.charAt(bytes.get(i + 1) & 0xF0 >> 4)).append(HEXES.charAt(bytes.get(i + 1) & 0x0F))
+                    .append(HEXES.charAt(bytes.get(i + 2) & 0xF0 >> 4)).append(HEXES.charAt(bytes.get(i + 2) & 0x0F))
+                    .append(HEXES.charAt(bytes.get(i + 3) & 0xF0 >> 4)).append(HEXES.charAt(bytes.get(i + 3) & 0x0F));
+            i += 4;
+        }
+        for (; i < s; i++)
+            sb.append(HEXES.charAt(bytes.get(i) & 0xF0 >> 4)).append(HEXES.charAt(bytes.get(i) & 0x0F));
         return sb.toString();
     }
 
     @Nullable
-    public static Collection<Byte> hex2Bytes(@NotNull String hex) {
+    public static List<Byte> hex2Bytes(@NotNull String hex) {
         if (TextUtils.isEmpty(hex) || hex.length() < 2)
             return null;
         String hexString = hex.toUpperCase();

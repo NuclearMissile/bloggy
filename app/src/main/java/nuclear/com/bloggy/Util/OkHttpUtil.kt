@@ -35,7 +35,7 @@ object OkHttpUtil {
     val INTERCEPTOR_LOGGING by lazy {
         val inter = HttpLoggingInterceptor()
         inter.level = if (Settings.INSTANCE.DebugMode)
-            HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.BASIC
+            HttpLoggingInterceptor.Level.HEADERS else HttpLoggingInterceptor.Level.BASIC
         inter
     }
 
@@ -53,11 +53,11 @@ object OkHttpUtil {
     val INTERCEPTOR_AUTO_CACHE: Interceptor by lazy {
         Interceptor { chain ->
             var req = chain.request()
-            if (!NetworkUtil.isConnected(BaseApplication.instance)) {
+            /*if (!NetworkUtil.isConnected(BaseApplication.instance)) {
                 req = req.newBuilder().cacheControl(CacheControl.FORCE_CACHE).build()
                 LogUtil.i(this, "*****No network, use cache.*****")
             }
-
+*/
             var resp = chain.proceed(req)
 
             if (NetworkUtil.isConnected(BaseApplication.instance)) {

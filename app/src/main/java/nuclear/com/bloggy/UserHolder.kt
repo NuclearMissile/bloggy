@@ -12,20 +12,24 @@ import nuclear.com.bloggy.Util.checkApiError
 
 object UserHolder {
     @Volatile
-    var self: User? = null
+    var currUser: User? = null
         private set
     val isAnonymous
-        get() = self == null
+        get() = currUser == null
     val isConfirmed
-        get() = self?.confirmed ?: false
+        get() = currUser?.confirmed ?: false
     val isAdmin
         get() = can(Permission.ADMIN)
     val isSavedTokenValid: Boolean
-        get() = Settings.INSTANCE.TokenExpireAt > DateUtil.TimeStamp + 30000 && Settings.INSTANCE.AuthToken != null
+        get() {
+            synchronized(this, {
+                return Settings.INSTANCE.TokenExpireAt > DateUtil.TimeStamp + 30000 && Settings.INSTANCE.AuthToken != null
+            })
+        }
 
     fun isSelfById(id: Int): Boolean {
-        self ?: return false
-        return self!!.id == id
+        currUser ?: return false
+        return currUser!!.id == id
     }
 
     fun handlePermissionError(context: Context, needed: Int) {
@@ -36,13 +40,13 @@ object UserHolder {
     }
 
     fun can(permission: Int): Boolean {
-        self ?: return false
-        return self!!.permissions and permission == permission
+        currUser ?: return false
+        return currUser!!.permissions and permission == permission
     }
 
     fun getAvatarUrl(size: Int): String? {
-        self ?: return null
-        return getAvatarUrl(self!!.avatarHash, size)
+        currUser ?: return null
+        return getAvatarUrl(currUser!!.avatarHash, size)
     }
 
     fun getAvatarUrl(avatarHash: String, size: Int, default: String = "identicon", rating: String = "g"): String {
@@ -50,20 +54,20 @@ object UserHolder {
     }
 
     fun login(user: User, password: String) {
-        self = user
+        currUser = user
         Settings.INSTANCE.SavedUser = user
         Settings.INSTANCE.Password = password
     }
 
     fun resume() {
         Settings.INSTANCE.Password ?: return
-        self = Settings.INSTANCE.SavedUser
+        currUser = Settings.INSTANCE.SavedUser
     }
 
     fun logout() {
         BaseApplication.favoritePostBox.removeAll()
         BaseApplication.draftBox.removeAll()
-        self = null
+        currUser = null
         Settings.INSTANCE.AuthToken = null
         Settings.INSTANCE.TokenExpireAt = -1
         Settings.INSTANCE.Password = null
@@ -72,30 +76,35 @@ object UserHolder {
 
     fun getAuthHeaderByToken(): String? {
         if (isAnonymous)
-            throw IllegalStateException("call getAuthHeaderByToken while self is anonymous")
+            throw IllegalStateException("call getAuthHeaderByToken while currUser is anonymous")
         return OkHttpUtil.genAuthHeader(Settings.INSTANCE.AuthToken!!)
     }
 
-    fun retryForToken(throwable: Flowable<Throwable>): Flowable<*> {
-        return throwable.flatMap {
-            if (it is TokenInvalidError) {
-                LogUtil.i(this, it.message)
-                ServiceFactory.DEF_SERVICE
-                        .getToken(getAuthHeaderByPassword())
-                        .checkApiError()
-                        .doOnNext {
-                            Settings.INSTANCE.AuthToken = it.result.token
-                            Settings.INSTANCE.TokenExpireAt = it.result.expireAt
-                        }
-            } else
-                throw it
-        }
+    fun retryForToken(throwable: Flowable<Throwable>): Flowable<Any> {
+        synchronized(this, {
+            return throwable.flatMap {
+                if (it is TokenInvalidError && isSavedTokenValid) {
+                    LogUtil.w(this, "token is already valid.")
+                    Flowable.just(0)
+                } else if (it is TokenInvalidError) {
+                    LogUtil.i(this, it.message)
+                    ServiceFactory.DEF_SERVICE
+                            .getToken(getAuthHeaderByPassword())
+                            .checkApiError()
+                            .doOnNext {
+                                Settings.INSTANCE.AuthToken = it.result.token
+                                Settings.INSTANCE.TokenExpireAt = it.result.expireAt
+                            }
+                } else
+                    throw it
+            }
+        })
     }
 
     private fun getAuthHeaderByPassword(): String {
         if (isAnonymous)
-            throw IllegalStateException("call getAuthHeaderByToken while self is anonymous")
-        return OkHttpUtil.genAuthHeader(self!!.email, Settings.INSTANCE.Password!!)
+            throw IllegalStateException("call getAuthHeaderByToken while currUser is anonymous")
+        return OkHttpUtil.genAuthHeader(currUser!!.email, Settings.INSTANCE.Password!!)
     }
 }
 

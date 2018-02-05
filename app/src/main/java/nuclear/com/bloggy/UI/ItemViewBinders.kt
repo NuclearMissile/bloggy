@@ -263,15 +263,15 @@ class DraftViewBinder(private val context: Context) : ItemViewBinder<NewArticle,
         }
 
         holder.commentCountTV.visibility = View.GONE
-        holder.usernameTV.text = UserHolder.self?.username
+        holder.usernameTV.text = UserHolder.currUser?.username
         holder.timestampTV.text = DateUtil.getFriendlyTime(item.timeStamp)
 
         Glide.with(context)
-                .load(UserHolder.getAvatarUrl(UserHolder.self!!.avatarHash, 120))
+                .load(UserHolder.getAvatarUrl(UserHolder.currUser!!.avatarHash, 120))
                 .apply(GlideOptions.DEF_OPTION)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.avatarIV)
-        holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(context, UserHolder.self!!.id) }
+        holder.avatarIV.setOnClickListener { UserInfoActivity.tryStart(context, UserHolder.currUser!!.id) }
 
         Markwon.setMarkdown(holder.bodyTV, item.body)
         holder.itemView.setOnClickListener { EditPostActivity.tryStart(context, item.body) }

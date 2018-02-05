@@ -6,16 +6,19 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import me.drakeet.multitype.Items
 import me.drakeet.support.about.AbsAboutActivity
 import me.drakeet.support.about.Category
 import me.drakeet.support.about.Contributor
+import me.drakeet.support.about.License
 import nuclear.com.bloggy.R
+import nuclear.com.bloggy.Util.GlideOptions
 import nuclear.com.swipeback.SwipeBackLayout
 import nuclear.com.swipeback.Utils
 import nuclear.com.swipeback.activity.ISwipeBackActivity
 import nuclear.com.swipeback.activity.SwipeBackActivityHelper
-import me.drakeet.support.about.License
 
 class AboutActivity : AbsAboutActivity(), ISwipeBackActivity {
     companion object {
@@ -75,7 +78,11 @@ class AboutActivity : AbsAboutActivity(), ISwipeBackActivity {
     }
 
     override fun onCreateHeader(icon: ImageView, slogan: TextView, version: TextView) {
-        icon.setImageResource(R.drawable.logo)
+        Glide.with(this)
+                .load(R.drawable.logo)
+                .apply(GlideOptions.DEF_OPTION)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(icon)
         slogan.text = "Bloggy"
         version.text = "v 1.0"
     }

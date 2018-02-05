@@ -116,14 +116,14 @@ class SettingsFragment : PreferenceFragment() {
                 true
             }
         } else {
-            pref.title = UserHolder.self!!.username
-            pref.summary = UserHolder.self!!.email
+            pref.title = UserHolder.currUser!!.username
+            pref.summary = UserHolder.currUser!!.email
             pref.setOnPreferenceClickListener {
-                UserInfoActivity.tryStart(activity, UserHolder.self!!.id)
+                UserInfoActivity.tryStart(activity, UserHolder.currUser!!.id)
                 true
             }
             Glide.with(context)
-                    .load(UserHolder.getAvatarUrl(UserHolder.self!!.avatarHash, 120))
+                    .load(UserHolder.getAvatarUrl(UserHolder.currUser!!.avatarHash, 120))
                     .apply(GlideOptions.DEF_OPTION)
                     .into(object : SimpleTarget<Drawable>() {
                         override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {

@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class ServiceFactory private constructor() {
     private val mDefClient = OkHttpUtil.genOkHttpClient(
             OkHttpUtil.INTERCEPTOR_LOGGING,
-            /* OkHttpUtil.INTERCEPTOR_AUTO_CACHE,*/
+            OkHttpUtil.INTERCEPTOR_AUTO_CACHE,
             OkHttpUtil.INTERCEPTOR_JSON_HEADER)
 
     fun <S> createService(serviceClass: Class<S>, baseUrl: String,
@@ -25,11 +25,11 @@ class ServiceFactory private constructor() {
     }
 
     companion object {
-        var DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
+        var DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl)
             private set
 
         fun reloadService() {
-            DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl!!)
+            DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl)
         }
     }
 }

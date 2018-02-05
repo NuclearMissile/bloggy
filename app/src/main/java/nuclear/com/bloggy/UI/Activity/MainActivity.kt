@@ -35,14 +35,17 @@ import nuclear.com.bloggy.UI.DraftViewBinder
 import nuclear.com.bloggy.UI.Fragment.BaseRVFragment
 import nuclear.com.bloggy.UI.Fragment.IPostFragment
 import nuclear.com.bloggy.UI.PostViewBinder
-import nuclear.com.bloggy.Util.*
-import nuclear.com.swipeback.activity.SwipeBackActivity
+import nuclear.com.bloggy.UI.Widget.RxSwipeBackActivity
+import nuclear.com.bloggy.Util.GlideOptions
+import nuclear.com.bloggy.Util.ToastUtil
+import nuclear.com.bloggy.Util.checkApiError
+import nuclear.com.bloggy.Util.defaultSchedulers
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.io.File
 import java.util.*
 
-class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelectedListener, FileChooserDialog.FileCallback {
+class MainActivity : RxSwipeBackActivity(), NavigationView.OnNavigationItemSelectedListener, FileChooserDialog.FileCallback {
     private val MAX_DOUBLE_BACK_DURATION: Long = 1000
     private var lastBackPressed: Long = 0
     private lateinit var mCurrentFragment: BaseRVFragment
@@ -139,7 +142,7 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
     private fun onAvatarClick() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START))
             drawer_layout.closeDrawer(GravityCompat.START)
-        UserInfoActivity.tryStart(this, UserHolder.self?.id)
+        UserInfoActivity.tryStart(this, UserHolder.currUser?.id)
     }
 
     private fun syncUIState() {
@@ -159,8 +162,8 @@ class MainActivity : SwipeBackActivity(), NavigationView.OnNavigationItemSelecte
                     .apply(GlideOptions.DEF_OPTION)
                     .transition(withCrossFade())
                     .into(avatarImageView)
-            usernameTextView.text = UserHolder.self!!.username
-            emailTextView.text = UserHolder.self!!.email
+            usernameTextView.text = UserHolder.currUser!!.username
+            emailTextView.text = UserHolder.currUser!!.email
         }
     }
 

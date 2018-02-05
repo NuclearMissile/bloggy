@@ -8,7 +8,7 @@ import nuclear.com.swipeback.Utils
 import nuclear.com.swipeback.activity.ISwipeBackActivity
 import nuclear.com.swipeback.activity.SwipeBackActivityHelper
 
-abstract class SwipeBackRxActivity : RxAppCompatActivity(), ISwipeBackActivity {
+abstract class RxSwipeBackActivity : RxAppCompatActivity(), ISwipeBackActivity {
     private lateinit var mHelper: SwipeBackActivityHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import nuclear.com.bloggy.Entity.REST.User
 import nuclear.com.bloggy.Util.EncryptSharedPreference
 import nuclear.com.bloggy.Util.LogUtil
+import nuclear.com.bloggy.Util.ToastUtil
 
 class Settings private constructor() {
     private val mEncryptPrefs by lazy { EncryptSharedPreference(BaseApplication.instance) }
@@ -38,9 +39,15 @@ class Settings private constructor() {
         get() = mEncryptPrefs.getLong("TokenExpireAt", -1)
         set(value) = mEncryptEditor.putLong("TokenExpireAt", value).apply()
 
-    var BaseUrl: String?
-        get() = mPrefs.getString(getResString(R.string.base_url), null)
-        set(value) = mEditor.putString(getResString(R.string.base_url), value).apply()
+    var BaseUrl: String
+        get() = mPrefs.getString(getResString(R.string.base_url), "http://192.168.43.201:5000/api/v1.0/")
+        set(value) {
+            if (!value.matches("(https?)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]".toRegex())) {
+                ToastUtil.showShortToast("Url invalid")
+                return
+            }
+            mEditor.putString(getResString(R.string.base_url), if (value.endsWith("/")) value else value + "/").apply()
+        }
 
     var SavedUser: User?
         get() {

@@ -26,12 +26,12 @@ import nuclear.com.bloggy.UI.Fragment.BaseRVFragment
 import nuclear.com.bloggy.UI.Fragment.IPostFragment
 import nuclear.com.bloggy.UI.PostViewBinder
 import nuclear.com.bloggy.UI.UserViewBinder
-import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
+import nuclear.com.bloggy.UI.Widget.RxSwipeBackActivity
 import nuclear.com.bloggy.Util.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
-class UserInfoActivity : SwipeBackRxActivity() {
+class UserInfoActivity : RxSwipeBackActivity() {
     private lateinit var mFollowState: FollowState
     private lateinit var mUser: User
     private var mId: Int = -1
@@ -187,7 +187,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_user_info, menu)
-        menu.findItem(R.id.action_log_out).isVisible = UserHolder.self!!.id == mId
+        menu.findItem(R.id.action_log_out).isVisible = UserHolder.currUser!!.id == mId
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -195,7 +195,7 @@ class UserInfoActivity : SwipeBackRxActivity() {
         when (item.itemId) {
             android.R.id.home -> finish()
             R.id.action_share ->
-                ShareUtil.shareText(this, "Share self link...", mUser.userLink)
+                ShareUtil.shareText(this, "Share currUser link...", mUser.userLink)
             R.id.action_log_out -> {
                 UserHolder.logout()
                 finish()

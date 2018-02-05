@@ -19,14 +19,13 @@ import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.activity_post.*
 import me.drakeet.multitype.MultiTypeAdapter
 import nuclear.com.bloggy.*
-import nuclear.com.bloggy.Entity.*
 import nuclear.com.bloggy.Entity.REST.*
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.UI.CommentViewBinder
 import nuclear.com.bloggy.UI.Fragment.BaseRVFragment
 import nuclear.com.bloggy.UI.PostContentViewBinder
 import nuclear.com.bloggy.UI.UserViewBinder
-import nuclear.com.bloggy.UI.Widget.SwipeBackRxActivity
+import nuclear.com.bloggy.UI.Widget.RxSwipeBackActivity
 import nuclear.com.bloggy.Util.ShareUtil
 import nuclear.com.bloggy.Util.ToastUtil
 import nuclear.com.bloggy.Util.checkApiError
@@ -34,7 +33,7 @@ import nuclear.com.bloggy.Util.defaultSchedulers
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
-class PostActivity : SwipeBackRxActivity() {
+class PostActivity : RxSwipeBackActivity() {
     private lateinit var mPost: Post
     private var mFavoritePost: FavoritePost? = null
         get() = BaseApplication.favoritePostBox.query()

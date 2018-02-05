@@ -5,7 +5,7 @@ import android.os.Environment
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import nuclear.com.bloggy.Entity.REST.FavoritePost
-import nuclear.com.bloggy.Entity.MyObjectBox
+import nuclear.com.bloggy.Entity.REST.MyObjectBox
 import nuclear.com.bloggy.Entity.REST.NewArticle
 import java.io.File
 
