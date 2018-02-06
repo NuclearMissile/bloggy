@@ -10,15 +10,7 @@ interface IWebSocketManager {
 
     fun disConnect()
 
-    fun tryReconnect()
-
-    fun cancelReconnect()
-
-    fun isConnected(): Boolean
-
     fun getStatus(): WebSocketStatus
-
-    // fun setWebsocketStatus(websocketStatus: WebSocketStatus)
 
     fun sendMessage(msg: String): Boolean
 

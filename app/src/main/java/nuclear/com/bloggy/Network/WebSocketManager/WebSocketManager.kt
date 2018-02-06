@@ -18,7 +18,7 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
     private val mUrl: String
     private val mOkHttpClient: OkHttpClient
     private val mRequest: Request
-    private val mWebSocketListener: WebSocketListener = object : WebSocketListener() {
+    private val mWebSocketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             websocket = webSocket
             websocketStatus = WebSocketStatus.CONNECTED
@@ -64,8 +64,6 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            websocketStatus = WebSocketStatus.DISCONNECTED
-            websocket = null
             if (Looper.myLooper() != Looper.getMainLooper()) {
                 mHandler.post({ listener?.onClosed(code, reason) })
             } else {
@@ -82,12 +80,14 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
     var websocketStatus = WebSocketStatus.DISCONNECTED
         @Synchronized
         private set
+        @Synchronized
+        get
     var websocket: WebSocket? = null
         private set
 
     companion object {
-        private const val BASE_RECONNECT_INTERVAL = 2000
-        private const val MAX_RECONNECT_INTERVAL = 64 * BASE_RECONNECT_INTERVAL
+        private const val BASE_RECONNECT_INTERVAL = 100
+        private const val MAX_RECONNECT_INTERVAL = 128 * BASE_RECONNECT_INTERVAL
     }
 
     class Builder(internal val mContext: Context) {
@@ -116,9 +116,7 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
             return this
         }
 
-        fun build(): WebSocketManager {
-            return WebSocketManager(this)
-        }
+        fun build() = WebSocketManager(this)
     }
 
     init {
@@ -133,6 +131,7 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
     private fun initConnect() {
         if (!NetworkUtil.isConnected(mContext)) {
             websocketStatus = WebSocketStatus.DISCONNECTED
+            websocket = null
             LogUtil.w(this, "WebSocket connect failed: Network not available.")
             return
         }
@@ -154,12 +153,28 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
         }
     }
 
-    override fun tryReconnect() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private fun tryReconnect() {
+        if (!isAutoReconnect || isManualClosed)
+            return
+        if (!NetworkUtil.isConnected(mContext)) {
+            websocketStatus = WebSocketStatus.DISCONNECTED
+            websocket = null
+            return
+        }
+        websocketStatus = WebSocketStatus.RECONNECTING
+        val delay = (1 shl reconnectCount) * BASE_RECONNECT_INTERVAL.toLong()
+        if (delay > MAX_RECONNECT_INTERVAL) {
+            cancelReconnect()
+            LogUtil.e(this, "reach max reconnect interval, reconnect failed, count:$reconnectCount")
+            return
+        }
+        mHandler.postDelayed(doReconnect, delay)
+        reconnectCount++
     }
 
-    override fun cancelReconnect() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private fun cancelReconnect() {
+        mHandler.removeCallbacks(doReconnect)
+        reconnectCount = 0
     }
 
     override fun connect() {
@@ -169,11 +184,18 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
 
     override fun disConnect() {
         isManualClosed = true
-
-    }
-
-    override fun isConnected(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (websocketStatus == WebSocketStatus.DISCONNECTED || websocket == null)
+            return
+        cancelReconnect()
+        mOkHttpClient.dispatcher().cancelAll()
+        if (websocket != null) {
+            val isNormalClosed = websocket!!.close(WebSocketCode.NORMAL_CLOSE.index, WebSocketCode.NORMAL_CLOSE.name)
+            if (!isNormalClosed) {
+                listener?.onClosed(WebSocketCode.ABNORMAL_CLOSE.index, WebSocketCode.ABNORMAL_CLOSE.name)
+            }
+        }
+        websocketStatus = WebSocketStatus.DISCONNECTED
+        websocket = null
     }
 
     override fun getWebSocket(): WebSocket? = websocket
@@ -181,10 +203,22 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
     override fun getStatus(): WebSocketStatus = websocketStatus
 
     override fun sendMessage(msg: String): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        var isSend = false
+        if (websocket != null && websocketStatus == WebSocketStatus.CONNECTED) {
+            isSend = websocket!!.send(msg)
+        }
+        if (!isSend)
+            tryReconnect()
+        return isSend
     }
 
     override fun sendBinaryMessage(byteString: ByteString): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        var isSend = false
+        if (websocket != null && websocketStatus == WebSocketStatus.CONNECTED) {
+            isSend = websocket!!.send(byteString)
+        }
+        if (!isSend)
+            tryReconnect()
+        return isSend
     }
 }
