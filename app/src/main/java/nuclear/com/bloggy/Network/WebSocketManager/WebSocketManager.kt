@@ -7,13 +7,12 @@ import nuclear.com.bloggy.Util.LogUtil
 import nuclear.com.bloggy.Util.NetworkUtil
 import okhttp3.*
 import okio.ByteString
-import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
 class WebSocketManager(builder: Builder) : IWebSocketManager {
     private val mHandler = Handler(Looper.getMainLooper())
-    private val doReconnect = { listener?.onReconnect(); initConnect() }
-    private val mLock: Lock = ReentrantLock()
+    private val doReconnect = { managerListener?.onReconnect(); initConnect() }
+    private val mLock = ReentrantLock()
     private val mContext: Context
     private val mUrl: String
     private val mOkHttpClient: OkHttpClient
@@ -24,50 +23,50 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
             websocketStatus = WebSocketStatus.CONNECTED
             cancelReconnect()
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ listener?.onOpen(response) })
+                mHandler.post({ managerListener?.onOpen(response) })
             } else {
-                listener?.onOpen(response)
+                managerListener?.onOpen(response)
             }
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             tryReconnect()
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ listener?.onFailure(t, response) })
+                mHandler.post({ managerListener?.onFailure(t, response) })
             } else {
-                listener?.onFailure(t, response)
+                managerListener?.onFailure(t, response)
             }
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ listener?.onClosing(code, reason) })
+                mHandler.post({ managerListener?.onClosing(code, reason) })
             } else {
-                listener?.onClosing(code, reason)
+                managerListener?.onClosing(code, reason)
             }
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ listener?.onMessage(text) })
+                mHandler.post({ managerListener?.onMessage(text) })
             } else {
-                listener?.onMessage(text)
+                managerListener?.onMessage(text)
             }
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ listener?.onBinaryMessage(bytes) })
+                mHandler.post({ managerListener?.onBinaryMessage(bytes) })
             } else {
-                listener?.onBinaryMessage(bytes)
+                managerListener?.onBinaryMessage(bytes)
             }
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ listener?.onClosed(code, reason) })
+                mHandler.post({ managerListener?.onClosed(code, reason) })
             } else {
-                listener?.onClosed(code, reason)
+                managerListener?.onClosed(code, reason)
             }
         }
     }
@@ -76,7 +75,7 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
     private var isManualClosed = false
     private var reconnectCount = 0
 
-    var listener: MyWebSocketListener? = null
+    var managerListener: WebSocketManagerListener? = null
     var websocketStatus = WebSocketStatus.DISCONNECTED
         @Synchronized
         private set
@@ -86,7 +85,7 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
         private set
 
     companion object {
-        private const val BASE_RECONNECT_INTERVAL = 100
+        private const val BASE_RECONNECT_INTERVAL = 1000
         private const val MAX_RECONNECT_INTERVAL = 128 * BASE_RECONNECT_INTERVAL
     }
 
@@ -165,6 +164,7 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
         val delay = (1 shl reconnectCount) * BASE_RECONNECT_INTERVAL.toLong()
         if (delay > MAX_RECONNECT_INTERVAL) {
             cancelReconnect()
+            isManualClosed = true
             LogUtil.e(this, "reach max reconnect interval, reconnect failed, count:$reconnectCount")
             return
         }
@@ -183,15 +183,15 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
     }
 
     override fun disConnect() {
-        isManualClosed = true
         if (websocketStatus == WebSocketStatus.DISCONNECTED || websocket == null)
             return
+        isManualClosed = true
         cancelReconnect()
         mOkHttpClient.dispatcher().cancelAll()
         if (websocket != null) {
             val isNormalClosed = websocket!!.close(WebSocketCode.NORMAL_CLOSE.index, WebSocketCode.NORMAL_CLOSE.name)
             if (!isNormalClosed) {
-                listener?.onClosed(WebSocketCode.ABNORMAL_CLOSE.index, WebSocketCode.ABNORMAL_CLOSE.name)
+                managerListener?.onClosed(WebSocketCode.ABNORMAL_CLOSE.index, WebSocketCode.ABNORMAL_CLOSE.name)
             }
         }
         websocketStatus = WebSocketStatus.DISCONNECTED
@@ -206,9 +206,9 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
         var isSend = false
         if (websocket != null && websocketStatus == WebSocketStatus.CONNECTED) {
             isSend = websocket!!.send(msg)
+            if (!isSend)
+                tryReconnect()
         }
-        if (!isSend)
-            tryReconnect()
         return isSend
     }
 
@@ -216,9 +216,9 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
         var isSend = false
         if (websocket != null && websocketStatus == WebSocketStatus.CONNECTED) {
             isSend = websocket!!.send(byteString)
+            if (!isSend)
+                tryReconnect()
         }
-        if (!isSend)
-            tryReconnect()
         return isSend
     }
 }

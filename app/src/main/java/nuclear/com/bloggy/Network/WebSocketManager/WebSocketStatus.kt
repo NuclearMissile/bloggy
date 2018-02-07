@@ -1,8 +1,5 @@
 package nuclear.com.bloggy.Network.WebSocketManager
 
-/**
- * Created by torri on 2018/2/5.
- */
 enum class WebSocketStatus(val index: Int) {
     CONNECTED(1),
     CONNECTING(0),

@@ -56,6 +56,11 @@
             android:name=".UI.Activity.SettingsActivity"
             android:label="@string/settings"
             tools:ignore="InnerclassSeparator" />
+
+        <service
+            android:name=".Service.WebSocketService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

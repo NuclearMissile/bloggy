@@ -18,6 +18,7 @@ import com.google.gson.Gson
 import com.rengwuxian.materialedittext.validation.METValidator
 import com.rengwuxian.materialedittext.validation.RegexpValidator
 import com.trello.rxlifecycle2.kotlin.bindToLifecycle
+import io.reactivex.Flowable
 import io.reactivex.rxkotlin.subscribeBy
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.input_fields_login.*
@@ -192,6 +193,7 @@ class LogInActivity : RxSwipeBackActivity() {
     private fun tryLogIn() {
         val email = email_field.text.toString()
         val password = password_field.text.toString()
+        val authHeader = OkHttpUtil.genAuthHeader(email, password)
         showDialog(R.string.progress_dialog_login_title, R.string.progress_dialog_content)
 
         Handler().postDelayed({

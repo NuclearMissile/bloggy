@@ -3,7 +3,7 @@ package nuclear.com.bloggy.Network.WebSocketManager
 import okhttp3.Response
 import okio.ByteString
 
-abstract class MyWebSocketListener {
+abstract class WebSocketManagerListener {
     open fun onOpen(response: Response) {}
 
     open fun onMessage(message: String) {}
@@ -25,7 +25,7 @@ fun genListener(onOpen: ((response: Response) -> Unit)? = null,
                 onReconnect: (() -> Unit)? = null,
                 onClosing: ((code: Int, reason: String) -> Unit)? = null,
                 onClosed: ((code: Int, reason: String) -> Unit)? = null,
-                onFailure: ((throwable: Throwable, response: Response?) -> Unit)? = null) = object : MyWebSocketListener() {
+                onFailure: ((throwable: Throwable, response: Response?) -> Unit)? = null) = object : WebSocketManagerListener() {
     override fun onOpen(response: Response) {
         onOpen?.invoke(response)
     }

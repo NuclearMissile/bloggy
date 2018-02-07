@@ -2,13 +2,11 @@ package nuclear.com.bloggy
 
 import android.content.Context
 import io.reactivex.Flowable
+import io.reactivex.rxkotlin.subscribeBy
 import nuclear.com.bloggy.Entity.REST.User
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.UI.Activity.LogInActivity
-import nuclear.com.bloggy.Util.DateUtil
-import nuclear.com.bloggy.Util.LogUtil
-import nuclear.com.bloggy.Util.OkHttpUtil
-import nuclear.com.bloggy.Util.checkApiError
+import nuclear.com.bloggy.Util.*
 
 object UserHolder {
     var currUser: User? = null
@@ -16,8 +14,6 @@ object UserHolder {
         private set
     val isAnonymous
         get() = currUser == null
-    val isConfirmed
-        get() = currUser?.confirmed ?: false
     val isAdmin
         get() = can(Permission.ADMIN)
     val isSavedTokenValid: Boolean
@@ -50,17 +46,22 @@ object UserHolder {
         return "https://secure.gravatar.com/avatar/$avatarHash?s=$size&d=$default&r=$rating"
     }
 
+    @Synchronized
     fun login(user: User, password: String) {
         currUser = user
         Settings.INSTANCE.SavedUser = user
         Settings.INSTANCE.Password = password
+        refreshToken(getAuthHeader())
     }
 
+    @Synchronized
     fun resume() {
         Settings.INSTANCE.Password ?: return
         currUser = Settings.INSTANCE.SavedUser
+        refreshToken(getAuthHeader())
     }
 
+    @Synchronized
     fun logout() {
         BaseApplication.favoritePostBox.removeAll()
         BaseApplication.draftBox.removeAll()
@@ -80,14 +81,10 @@ object UserHolder {
     @Synchronized
     fun retryForToken(throwable: Flowable<Throwable>): Flowable<Any> {
         return throwable.flatMap {
-            if (it is TokenInvalidError && isSavedTokenValid) {
-                LogUtil.i(this, "token is valid.")
-                Flowable.just(0)
-            } else if (it is TokenInvalidError) {
+            if (it is TokenInvalidError) {
                 LogUtil.i(this, it.message)
                 ServiceFactory.DEF_SERVICE
-                        .getToken(getAuthHeaderByPassword())
-                        .checkApiError()
+                        .getToken(getAuthHeader())
                         .doOnNext {
                             Settings.INSTANCE.AuthToken = it.result.token
                             Settings.INSTANCE.TokenExpireAt = it.result.expireAt
@@ -97,7 +94,21 @@ object UserHolder {
         }
     }
 
-    private fun getAuthHeaderByPassword(): String {
+    private fun refreshToken(authHeader: String) {
+        if (isSavedTokenValid)
+            return
+        ServiceFactory.DEF_SERVICE.getToken(authHeader)
+                .checkApiError()
+                .allIOSchedulers()
+                .subscribeBy(onNext = {
+                    Settings.INSTANCE.AuthToken = it.result.token
+                    Settings.INSTANCE.TokenExpireAt = it.result.expireAt
+                }, onError = {
+                    handleError(this, it)
+                })
+    }
+
+    private fun getAuthHeader(): String {
         if (isAnonymous)
             throw IllegalStateException("call getAuthHeaderByToken while currUser is anonymous")
         return OkHttpUtil.genAuthHeader(currUser!!.email, Settings.INSTANCE.Password!!)
