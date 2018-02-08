@@ -61,7 +61,7 @@ class EditPostActivity : RxSwipeBackActivity() {
                     .subscribeBy(onNext = {
                         if (!UserHolder.can(Permission.WRITE)) {
                             UserHolder.handlePermissionError(context, Permission.WRITE)
-                        } else if (!UserHolder.isSelfById(it.result.authorId)) {
+                        } else if (!UserHolder.isSelfId(it.result.authorId)) {
                             LogUtil.w(this, "try to edit a post not by currUser")
                         } else {
                             val intent = Intent(context, EditPostActivity::class.java)

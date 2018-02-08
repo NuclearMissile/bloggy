@@ -123,7 +123,7 @@ class UserInfoActivity : RxSwipeBackActivity() {
         }
 
         var toolbarTitle = mUser.username
-        if (UserHolder.isSelfById(mUser.id)) {
+        if (UserHolder.isSelfId(mUser.id)) {
             follow_unfollow_btn_user_info.visibility = View.GONE
             edit_btn_user_info.visibility = View.VISIBLE
             toolbarTitle += " [Self]"

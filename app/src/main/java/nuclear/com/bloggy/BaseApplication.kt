@@ -1,17 +1,20 @@
 package nuclear.com.bloggy
 
 import android.app.Application
+import android.content.Intent
 import android.os.Environment
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import nuclear.com.bloggy.Entity.REST.FavoritePost
 import nuclear.com.bloggy.Entity.REST.MyObjectBox
 import nuclear.com.bloggy.Entity.REST.NewArticle
+import nuclear.com.bloggy.Service.WebSocketService
+import nuclear.com.bloggy.Util.LogUtil
 import java.io.File
 
 class BaseApplication : Application() {
     companion object {
-        lateinit var instance: BaseApplication
+        lateinit var INSTANCE: BaseApplication
             private set
         lateinit var boxStore: BoxStore
             private set
@@ -21,12 +24,23 @@ class BaseApplication : Application() {
             private set
     }
 
+    fun startWSService() {
+        if (Settings.INSTANCE.EnableWSService) {
+            startService(Intent(this, WebSocketService::class.java))
+        }
+    }
+
+    fun stopWSService() {
+        stopService(Intent(this, WebSocketService::class.java))
+    }
+
     override fun onCreate() {
         super.onCreate()
-        instance = this
+        INSTANCE = this
         boxStore = MyObjectBox.builder().androidContext(this).build()
         favoritePostBox = boxStore.boxFor(FavoritePost::class.java)
         draftBox = boxStore.boxFor(NewArticle::class.java)
+        Settings.INSTANCE.EnableWSService = true
         UserHolder.resume()
     }
 

@@ -31,15 +31,13 @@ import nuclear.com.bloggy.*
 import nuclear.com.bloggy.Entity.REST.NewArticle
 import nuclear.com.bloggy.Entity.REST.Post
 import nuclear.com.bloggy.Network.ServiceFactory
+import nuclear.com.bloggy.Service.WebSocketService
 import nuclear.com.bloggy.UI.DraftViewBinder
 import nuclear.com.bloggy.UI.Fragment.BaseRVFragment
 import nuclear.com.bloggy.UI.Fragment.IPostFragment
 import nuclear.com.bloggy.UI.PostViewBinder
 import nuclear.com.bloggy.UI.Widget.RxSwipeBackActivity
-import nuclear.com.bloggy.Util.GlideOptions
-import nuclear.com.bloggy.Util.ToastUtil
-import nuclear.com.bloggy.Util.checkApiError
-import nuclear.com.bloggy.Util.defaultSchedulers
+import nuclear.com.bloggy.Util.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.io.File

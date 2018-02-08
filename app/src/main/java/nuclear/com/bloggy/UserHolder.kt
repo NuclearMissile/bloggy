@@ -19,8 +19,10 @@ object UserHolder {
     val isSavedTokenValid: Boolean
         @Synchronized
         get() = Settings.INSTANCE.TokenExpireAt > DateUtil.TimeStamp + 30000 && Settings.INSTANCE.AuthToken != null
+    private val authHeaderByPassword: String
+        get() = OkHttpUtil.genAuthHeader(currUser!!.email, Settings.INSTANCE.Password!!)
 
-    fun isSelfById(id: Int): Boolean {
+    fun isSelfId(id: Int): Boolean {
         currUser ?: return false
         return currUser!!.id == id
     }
@@ -51,14 +53,14 @@ object UserHolder {
         currUser = user
         Settings.INSTANCE.SavedUser = user
         Settings.INSTANCE.Password = password
-        refreshToken(getAuthHeader())
+        refreshToken(authHeaderByPassword, BaseApplication.INSTANCE::startWSService)
     }
 
     @Synchronized
     fun resume() {
         Settings.INSTANCE.Password ?: return
         currUser = Settings.INSTANCE.SavedUser
-        refreshToken(getAuthHeader())
+        refreshToken(authHeaderByPassword, BaseApplication.INSTANCE::startWSService)
     }
 
     @Synchronized
@@ -70,6 +72,7 @@ object UserHolder {
         Settings.INSTANCE.TokenExpireAt = -1
         Settings.INSTANCE.Password = null
         Settings.INSTANCE.SavedUser = null
+        BaseApplication.INSTANCE.stopWSService()
     }
 
     fun getAuthHeaderByToken(): String? {
@@ -84,7 +87,8 @@ object UserHolder {
             if (it is TokenInvalidError) {
                 LogUtil.i(this, it.message)
                 ServiceFactory.DEF_SERVICE
-                        .getToken(getAuthHeader())
+                        .getToken(authHeaderByPassword)
+                        .checkApiError()
                         .doOnNext {
                             Settings.INSTANCE.AuthToken = it.result.token
                             Settings.INSTANCE.TokenExpireAt = it.result.expireAt
@@ -94,24 +98,21 @@ object UserHolder {
         }
     }
 
-    private fun refreshToken(authHeader: String) {
-        if (isSavedTokenValid)
+    private fun refreshToken(authHeader: String, onNext: (() -> Unit)? = null) {
+        if (isSavedTokenValid) {
+            onNext?.invoke()
             return
+        }
         ServiceFactory.DEF_SERVICE.getToken(authHeader)
                 .checkApiError()
                 .allIOSchedulers()
                 .subscribeBy(onNext = {
                     Settings.INSTANCE.AuthToken = it.result.token
                     Settings.INSTANCE.TokenExpireAt = it.result.expireAt
+                    onNext?.invoke()
                 }, onError = {
                     handleError(this, it)
                 })
-    }
-
-    private fun getAuthHeader(): String {
-        if (isAnonymous)
-            throw IllegalStateException("call getAuthHeaderByToken while currUser is anonymous")
-        return OkHttpUtil.genAuthHeader(currUser!!.email, Settings.INSTANCE.Password!!)
     }
 }
 

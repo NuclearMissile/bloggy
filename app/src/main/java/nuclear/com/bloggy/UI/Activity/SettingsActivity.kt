@@ -91,7 +91,6 @@ class SettingsFragment : PreferenceFragment() {
                     .onPositive { dialog, _ ->
                         pref.summary = dialog.inputEditText?.text
                         Settings.INSTANCE.BaseUrl = pref.summary.toString()
-                        ServiceFactory.reloadService()
                     }.show()
             true
         }

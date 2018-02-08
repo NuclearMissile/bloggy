@@ -9,96 +9,94 @@ import okhttp3.*
 import okio.ByteString
 import java.util.concurrent.locks.ReentrantLock
 
-class WebSocketManager(builder: Builder) : IWebSocketManager {
+class WebSocketManager private constructor(builder: Builder) : IWebSocketManager {
     private val mHandler = Handler(Looper.getMainLooper())
-    private val doReconnect = { managerListener?.onReconnect(); initConnect() }
+    private val doReconnect = { listener?.onReconnect(); initConnect() }
     private val mLock = ReentrantLock()
-    private val mContext: Context
-    private val mUrl: String
-    private val mOkHttpClient: OkHttpClient
-    private val mRequest: Request
     private val mWebSocketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             websocket = webSocket
             websocketStatus = WebSocketStatus.CONNECTED
             cancelReconnect()
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ managerListener?.onOpen(response) })
+                mHandler.post({ listener?.onOpen(response) })
             } else {
-                managerListener?.onOpen(response)
+                listener?.onOpen(response)
             }
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             tryReconnect()
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ managerListener?.onFailure(t, response) })
+                mHandler.post({ listener?.onFailure(t, response) })
             } else {
-                managerListener?.onFailure(t, response)
+                listener?.onFailure(t, response)
             }
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ managerListener?.onClosing(code, reason) })
+                mHandler.post({ listener?.onClosing(code, reason) })
             } else {
-                managerListener?.onClosing(code, reason)
+                listener?.onClosing(code, reason)
             }
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ managerListener?.onMessage(text) })
+                mHandler.post({ listener?.onMessage(text) })
             } else {
-                managerListener?.onMessage(text)
+                listener?.onMessage(text)
             }
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ managerListener?.onBinaryMessage(bytes) })
+                mHandler.post({ listener?.onBinaryMessage(bytes) })
             } else {
-                managerListener?.onBinaryMessage(bytes)
+                listener?.onBinaryMessage(bytes)
             }
         }
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             if (Looper.myLooper() != Looper.getMainLooper()) {
-                mHandler.post({ managerListener?.onClosed(code, reason) })
+                mHandler.post({ listener?.onClosed(code, reason) })
             } else {
-                managerListener?.onClosed(code, reason)
+                listener?.onClosed(code, reason)
             }
+            mOkHttpClient.dispatcher().cancelAll()
+            websocketStatus = WebSocketStatus.DISCONNECTED
+            websocket = null
         }
     }
-
-    private var isAutoReconnect = true
     private var isManualClosed = false
     private var reconnectCount = 0
+    private var mContext: Context
+    private var mOkHttpClient: OkHttpClient
+    private var mRequest: Request
 
-    var managerListener: WebSocketManagerListener? = null
+    var listener: IWebSocketManagerListener? = null
     var websocketStatus = WebSocketStatus.DISCONNECTED
         @Synchronized
         private set
-        @Synchronized
-        get
     var websocket: WebSocket? = null
+        private set
+    var isAutoReconnect: Boolean = true
         private set
 
     companion object {
-        private const val BASE_RECONNECT_INTERVAL = 1000
+        private const val BASE_RECONNECT_INTERVAL = 2000
         private const val MAX_RECONNECT_INTERVAL = 128 * BASE_RECONNECT_INTERVAL
     }
 
-    class Builder(internal val mContext: Context) {
-        internal lateinit var mUrl: String
-        internal var autoReconnect = true
-        internal lateinit var mClient: OkHttpClient
-        internal lateinit var mRequest: Request
-
-        fun url(url: String): Builder {
-            mUrl = url
-            return this
-        }
+    class Builder(val context: Context) {
+        var autoReconnect = true
+            private set
+        lateinit var mClient: OkHttpClient
+            private set
+        lateinit var mRequest: Request
+            private set
+        val mContext: Context = context
 
         fun request(request: Request): Builder {
             mRequest = request
@@ -115,15 +113,21 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
             return this
         }
 
-        fun build() = WebSocketManager(this)
+        fun build(): WebSocketManager? {
+            try {
+                return WebSocketManager(this)
+            } catch (e: UninitializedPropertyAccessException) {
+                e.printStackTrace()
+            }
+            return null
+        }
     }
 
     init {
         mContext = builder.mContext
-        mUrl = builder.mUrl
+        mRequest = builder.mRequest
         isAutoReconnect = builder.autoReconnect
         mOkHttpClient = builder.mClient
-        mRequest = builder.mRequest
     }
 
     @Synchronized
@@ -163,8 +167,7 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
         websocketStatus = WebSocketStatus.RECONNECTING
         val delay = (1 shl reconnectCount) * BASE_RECONNECT_INTERVAL.toLong()
         if (delay > MAX_RECONNECT_INTERVAL) {
-            cancelReconnect()
-            isManualClosed = true
+            disConnect()
             LogUtil.e(this, "reach max reconnect interval, reconnect failed, count:$reconnectCount")
             return
         }
@@ -187,15 +190,12 @@ class WebSocketManager(builder: Builder) : IWebSocketManager {
             return
         isManualClosed = true
         cancelReconnect()
-        mOkHttpClient.dispatcher().cancelAll()
         if (websocket != null) {
             val isNormalClosed = websocket!!.close(WebSocketCode.NORMAL_CLOSE.index, WebSocketCode.NORMAL_CLOSE.name)
             if (!isNormalClosed) {
-                managerListener?.onClosed(WebSocketCode.ABNORMAL_CLOSE.index, WebSocketCode.ABNORMAL_CLOSE.name)
+                listener?.onClosed(WebSocketCode.ABNORMAL_CLOSE.index, WebSocketCode.ABNORMAL_CLOSE.name)
             }
         }
-        websocketStatus = WebSocketStatus.DISCONNECTED
-        websocket = null
     }
 
     override fun getWebSocket(): WebSocket? = websocket

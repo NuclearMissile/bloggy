@@ -7,11 +7,18 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-class ServiceFactory private constructor() {
+object ServiceFactory {
     private val mDefClient = OkHttpUtil.genOkHttpClient(
             OkHttpUtil.INTERCEPTOR_LOGGING,
             OkHttpUtil.INTERCEPTOR_AUTO_CACHE,
             OkHttpUtil.INTERCEPTOR_JSON_HEADER)
+
+    var DEF_SERVICE = createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl)
+        private set
+
+    fun refreshDefService() {
+        DEF_SERVICE = createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl)
+    }
 
     fun <S> createService(serviceClass: Class<S>, baseUrl: String,
                           okHttpClient: OkHttpClient = mDefClient): S {
@@ -22,14 +29,5 @@ class ServiceFactory private constructor() {
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
                 .create(serviceClass)
-    }
-
-    companion object {
-        var DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl)
-            private set
-
-        fun reloadService() {
-            DEF_SERVICE = ServiceFactory().createService(FlaskyService::class.java, Settings.INSTANCE.BaseUrl)
-        }
     }
 }

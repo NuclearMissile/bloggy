@@ -18,7 +18,6 @@ import io.reactivex.Flowable
 import io.reactivex.rxkotlin.subscribeBy
 import me.drakeet.multitype.ItemViewBinder
 import nuclear.com.bloggy.*
-import nuclear.com.bloggy.Entity.*
 import nuclear.com.bloggy.Entity.REST.*
 import nuclear.com.bloggy.Network.ServiceFactory
 import nuclear.com.bloggy.UI.Activity.EditPostActivity
@@ -88,8 +87,8 @@ class PostViewBinder(private val context: Context, private val lifecycleProvider
                 }
             }
             popup.menu.findItem(R.id.delete_popup_post_item).isVisible = UserHolder.isAdmin
-            popup.menu.findItem(R.id.edit_popup_post_item).isVisible = UserHolder.isSelfById(item.authorId)
-            popup.menu.findItem(R.id.delete_popup_post_item).isVisible = UserHolder.isSelfById(item.authorId)
+            popup.menu.findItem(R.id.edit_popup_post_item).isVisible = UserHolder.isSelfId(item.authorId)
+            popup.menu.findItem(R.id.delete_popup_post_item).isVisible = UserHolder.isSelfId(item.authorId)
             popup.menu.findItem(R.id.favorite_popup_post_item).isVisible = !UserHolder.isAnonymous
             popup.menu.findItem(R.id.favorite_popup_post_item).isChecked = favorite != null
             popup.show()
@@ -129,7 +128,7 @@ class CommentViewBinder(private val context: Context, private val lifecycleProvi
     : ItemViewBinder<Comment, CommentViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: Comment) {
         fun onLongClick(): Boolean {
-            if (!UserHolder.isAdmin && !UserHolder.isSelfById(item.authorId))
+            if (!UserHolder.isAdmin && !UserHolder.isSelfId(item.authorId))
                 return true
             val popup = PopupMenu(context, holder.itemView, Gravity.END)
             popup.menuInflater.inflate(R.menu.popup_menu_comment_item, popup.menu)

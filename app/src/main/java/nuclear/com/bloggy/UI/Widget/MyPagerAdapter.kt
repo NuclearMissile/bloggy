@@ -9,9 +9,9 @@ import android.view.ViewGroup
 abstract class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     private val mFragments = SparseArray<Fragment>()
 
-    override abstract fun getCount(): Int
+    abstract override fun getCount(): Int
 
-    override abstract fun getItem(position: Int): Fragment
+    abstract override fun getItem(position: Int): Fragment
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val f = super.instantiateItem(container, position) as Fragment

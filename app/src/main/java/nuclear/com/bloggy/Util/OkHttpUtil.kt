@@ -53,14 +53,14 @@ object OkHttpUtil {
     val INTERCEPTOR_AUTO_CACHE: Interceptor by lazy {
         Interceptor { chain ->
             var req = chain.request()
-            /*if (!NetworkUtil.isConnected(BaseApplication.instance)) {
+            /*if (!NetworkUtil.isConnected(BaseApplication.INSTANCE)) {
                 req = req.newBuilder().cacheControl(CacheControl.FORCE_CACHE).build()
                 LogUtil.i(this, "*****No network, use cache.*****")
             }
 */
             var resp = chain.proceed(req)
 
-            if (NetworkUtil.isConnected(BaseApplication.instance)) {
+            if (NetworkUtil.isConnected(BaseApplication.INSTANCE)) {
                 val maxAge = 60
                 var cacheControl = req.cacheControl().toString()
                 if (TextUtils.isEmpty(cacheControl))
@@ -82,24 +82,18 @@ object OkHttpUtil {
 
     fun genAuthHeader(email: String, password: String): String = Credentials.basic(email, password)
 
-    fun genAuthInterceptor(username: String, password: String): Interceptor {
-        if (!TextUtils.isEmpty(username) and !TextUtils.isEmpty(password))
-            return genAuthInterceptor(genAuthHeader(username, password))
-        throw IllegalArgumentException("username or password cannot be empty.")
-    }
-
-    private fun genAuthInterceptor(tokenB64: String): Interceptor {
-        if (TextUtils.isEmpty(tokenB64))
-            throw IllegalArgumentException("tokenB64 cannot be empty.")
+    fun getAuthInterceptor(authHeader: String): Interceptor {
+        if (TextUtils.isEmpty(authHeader))
+            throw IllegalArgumentException("authHeader cannot be empty.")
         return Interceptor { chain ->
             var req = chain.request()
-            req = req.newBuilder().header("Authorization", tokenB64).build()
-            return@Interceptor chain.proceed(req)
+            req = req.newBuilder().header("Authorization", authHeader).build()
+            chain.proceed(req)
         }
     }
 
     fun genOkHttpClient(vararg interceptors: Interceptor): OkHttpClient {
-        val cacheDir = File(BaseApplication.instance.cacheDir, "OkHttpCache")
+        val cacheDir = File(BaseApplication.INSTANCE.cacheDir, "OkHttpCache")
         val builder = OkHttpClient.Builder()
                 .retryOnConnectionFailure(true)
                 .connectTimeout(DEF_TIMEOUT, TimeUnit.SECONDS)

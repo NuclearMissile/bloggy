@@ -70,7 +70,7 @@ class PostActivity : RxSwipeBackActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (UserHolder.isSelfById(mPost.authorId))
+        if (UserHolder.isSelfId(mPost.authorId))
             Handler().postDelayed({
                 fab_post.show()
             }, 200)
@@ -162,7 +162,7 @@ class PostActivity : RxSwipeBackActivity() {
                 when (tab.position) {
                     0 -> {
                         supportActionBar?.setTitle(R.string.post)
-                        if (UserHolder.isSelfById(mPost.authorId)) {
+                        if (UserHolder.isSelfId(mPost.authorId)) {
                             fab_post.setImageResource(R.drawable.pencil)
                             fab_post.show()
                         } else
@@ -183,8 +183,8 @@ class PostActivity : RxSwipeBackActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.findItem(R.id.delete_post).isVisible = UserHolder.isAdmin
-        menu.findItem(R.id.edit_post).isVisible = UserHolder.isSelfById(mPost.authorId)
-        menu.findItem(R.id.delete_post).isVisible = UserHolder.isSelfById(mPost.authorId)
+        menu.findItem(R.id.edit_post).isVisible = UserHolder.isSelfId(mPost.authorId)
+        menu.findItem(R.id.delete_post).isVisible = UserHolder.isSelfId(mPost.authorId)
         menu.findItem(R.id.favorite_post).isVisible = !UserHolder.isAnonymous
         menu.findItem(R.id.favorite_post).isChecked = mFavoritePost != null
         return super.onPrepareOptionsMenu(menu)
