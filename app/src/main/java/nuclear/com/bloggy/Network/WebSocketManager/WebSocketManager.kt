@@ -98,7 +98,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
 
     companion object {
         private const val BASE_RECONNECT_INTERVAL = 1000
-        private const val MAX_RECONNECT_COUNT = 2
+        private const val MAX_RECONNECT_COUNT = 5
     }
 
     class Builder(val context: Context) {
@@ -179,7 +179,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
         websocketStatus = WebSocketStatus.RECONNECTING
         val delay = (1 shl reconnectCount) * BASE_RECONNECT_INTERVAL.toLong()
         if (reconnectCount >= MAX_RECONNECT_COUNT) {
-            LogUtil.e(this, "reach max reconnect interval, reconnect failed, count:$reconnectCount")
+            LogUtil.w(this, "reach max reconnect interval, reconnect failed, count:$reconnectCount")
             disConnect()
             return
         }
@@ -202,15 +202,13 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
             return
         isManualClosed = true
         cancelReconnect()
-        if (websocket != null) {
-            val isNormalClosed = websocket?.close(WebSocketCode.NORMAL_CLOSE.index, WebSocketCode.NORMAL_CLOSE.toString())
-                    ?: false
-            if (!isNormalClosed) {
-                listener?.onClosed(WebSocketCode.ABNORMAL_CLOSE.index, WebSocketCode.ABNORMAL_CLOSE.toString())
-                mOkHttpClient.dispatcher().cancelAll()
-                websocketStatus = WebSocketStatus.DISCONNECTED
-                websocket = null
-            }
+        val isNormalClosed = websocket?.close(WebSocketCode.NORMAL_CLOSE.index, WebSocketCode.NORMAL_CLOSE.toString())
+                ?: false
+        if (!isNormalClosed) {
+            listener?.onClosed(WebSocketCode.ABNORMAL_CLOSE.index, WebSocketCode.ABNORMAL_CLOSE.toString())
+            mOkHttpClient.dispatcher().cancelAll()
+            websocketStatus = WebSocketStatus.DISCONNECTED
+            websocket = null
         }
     }
 

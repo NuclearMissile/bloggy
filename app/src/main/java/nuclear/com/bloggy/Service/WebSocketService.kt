@@ -1,12 +1,12 @@
 package nuclear.com.bloggy.Service
 
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
 import com.google.gson.Gson
@@ -27,7 +27,6 @@ class WebSocketService : Service() {
     private lateinit var mWebSocketManager: WebSocketManager
     private lateinit var mNotificationManager: NotificationManager
 
-    @SuppressLint("NewApi")
     override fun onCreate() {
         val request = Request.Builder().url(Settings.INSTANCE.WebSocketUrl).build()
         mWebSocketManager = WebSocketManager.Builder(this)
@@ -38,7 +37,8 @@ class WebSocketService : Service() {
                 .build()!!
         setListener()
         mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mNotificationManager.createNotificationChannel(NotificationChannel("1", "Bloggy Service", NotificationManager.IMPORTANCE_DEFAULT))
+        if (Build.VERSION.SDK_INT >= 26)
+            mNotificationManager.createNotificationChannel(NotificationChannel("1", "Bloggy Service", NotificationManager.IMPORTANCE_DEFAULT))
         super.onCreate()
     }
 
