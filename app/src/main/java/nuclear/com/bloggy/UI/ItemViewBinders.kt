@@ -26,6 +26,7 @@ import nuclear.com.bloggy.UI.Activity.UserInfoActivity
 import nuclear.com.bloggy.Util.*
 import org.greenrobot.eventbus.EventBus
 import ru.noties.markwon.Markwon
+import ru.noties.markwon.view.MarkwonViewCompat
 
 class PostViewBinder(private val context: Context, private val lifecycleProvider: LifecycleProvider<*>)
     : ItemViewBinder<Post, PostViewBinder.ViewHolder>() {
@@ -194,7 +195,7 @@ class CommentViewBinder(private val context: Context, private val lifecycleProvi
 
 class PostContentViewBinder : ItemViewBinder<Post, PostContentViewBinder.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, item: Post) {
-        Markwon.setMarkdown(holder.markdownTV, item.body)
+        holder.markdownTV.markdown = item.body
         holder.commentCountTV.text = "Comments: ${item.commentsCount}"
         holder.timeStampTV.text = DateUtil.getFriendlyTime(item.timeStamp)
     }
@@ -204,7 +205,7 @@ class PostContentViewBinder : ItemViewBinder<Post, PostContentViewBinder.ViewHol
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        internal val markdownTV: TextView = itemView.findViewById(R.id.markdown_tv_post_content_item)
+        internal val markdownTV: MarkwonViewCompat = itemView.findViewById(R.id.markdown_tv_post_content_item)
         internal val commentCountTV: TextView = itemView.findViewById(R.id.comment_count_tv_post_content_item)
         internal val timeStampTV: TextView = itemView.findViewById(R.id.timestamp_tv_post_content_item)
     }

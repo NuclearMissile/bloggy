@@ -202,13 +202,13 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
         if (websocketStatus == WebSocketStatus.DISCONNECTED)
             return
         isManualClosed = true
+        websocketStatus = WebSocketStatus.DISCONNECTED
         cancelReconnect()
         val isNormalClosed = websocket?.close(WebSocketCode.NORMAL_CLOSE.index, WebSocketCode.NORMAL_CLOSE.toString())
                 ?: false
         if (!isNormalClosed) {
             listener?.onClosed(WebSocketCode.ABNORMAL_CLOSE.index, WebSocketCode.ABNORMAL_CLOSE.toString())
             mOkHttpClient.dispatcher().cancelAll()
-            websocketStatus = WebSocketStatus.DISCONNECTED
             websocket = null
         }
     }

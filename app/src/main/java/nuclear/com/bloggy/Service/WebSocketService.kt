@@ -27,11 +27,14 @@ class WebSocketService : Service() {
     private lateinit var mNotificationManager: NotificationManager
 
     override fun onCreate() {
-        val request = Request.Builder().url(Settings.INSTANCE.WebSocketUrl).build()
+        val request = Request.Builder()
+                .url(Settings.INSTANCE.WebSocketUrl)
+                .addHeader("authorization", OkHttpUtil.genAuthHeader(Settings.INSTANCE.AuthToken!!))
+                .addHeader("client_type", "Android")
+                .build()
         mWebSocketManager = WebSocketManager.Builder(this)
                 .autoReconnect(true)
-                .client(OkHttpUtil.genOkHttpClient(OkHttpUtil.INTERCEPTOR_LOGGING,
-                        OkHttpUtil.getAuthInterceptor(OkHttpUtil.genAuthHeader(Settings.INSTANCE.AuthToken!!))))
+                .client(OkHttpUtil.genOkHttpClient(OkHttpUtil.INTERCEPTOR_LOGGING))
                 .request(request)
                 .build()!!
         setListener()
