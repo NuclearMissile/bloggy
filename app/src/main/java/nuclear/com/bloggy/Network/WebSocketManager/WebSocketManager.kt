@@ -11,7 +11,11 @@ import java.util.concurrent.locks.ReentrantLock
 
 class WebSocketManager private constructor(builder: Builder) : IWebSocketManager {
     private val mHandler = Handler(Looper.getMainLooper())
-    private val doReconnect = { listener?.onReconnect(); initConnect() }
+    private val doReconnect = {
+        LogUtil.i(this, "do reconnect, times: $reconnectCount")
+        listener?.onReconnect()
+        initConnect()
+    }
     private val mLock = ReentrantLock()
     private val mWebSocketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -26,12 +30,12 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            tryReconnect()
             if (Looper.myLooper() != Looper.getMainLooper()) {
                 mHandler.post({ listener?.onFailure(t, response) })
             } else {
                 listener?.onFailure(t, response)
             }
+            tryReconnect()
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -58,6 +62,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
             }
         }
 
+        // only invoke while websocket normal closed
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             if (Looper.myLooper() != Looper.getMainLooper()) {
                 mHandler.post({ listener?.onClosed(code, reason) })
@@ -93,7 +98,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
 
     companion object {
         private const val BASE_RECONNECT_INTERVAL = 1000
-        private const val MAX_RECONNECT_COUNT = 8
+        private const val MAX_RECONNECT_COUNT = 2
     }
 
     class Builder(val context: Context) {
@@ -144,8 +149,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
             return
         }
         if (!NetworkUtil.isConnected(mContext)) {
-            websocketStatus = WebSocketStatus.DISCONNECTED
-            websocket = null
+            disConnect()
             LogUtil.w(this, "WebSocket connect failed: Network not available.")
             return
         }
@@ -164,18 +168,19 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
     }
 
     private fun tryReconnect() {
-        if (!isAutoReconnect || isManualClosed)
+        if (!isAutoReconnect || isManualClosed) {
+            disConnect()
             return
+        }
         if (!NetworkUtil.isConnected(mContext)) {
-            websocketStatus = WebSocketStatus.DISCONNECTED
-            websocket = null
+            disConnect()
             return
         }
         websocketStatus = WebSocketStatus.RECONNECTING
         val delay = (1 shl reconnectCount) * BASE_RECONNECT_INTERVAL.toLong()
-        if (reconnectCount > MAX_RECONNECT_COUNT) {
-            disConnect()
+        if (reconnectCount >= MAX_RECONNECT_COUNT) {
             LogUtil.e(this, "reach max reconnect interval, reconnect failed, count:$reconnectCount")
+            disConnect()
             return
         }
         mHandler.postDelayed(doReconnect, delay)
@@ -198,9 +203,13 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
         isManualClosed = true
         cancelReconnect()
         if (websocket != null) {
-            val isNormalClosed = websocket!!.close(WebSocketCode.NORMAL_CLOSE.index, WebSocketCode.NORMAL_CLOSE.name)
+            val isNormalClosed = websocket?.close(WebSocketCode.NORMAL_CLOSE.index, WebSocketCode.NORMAL_CLOSE.toString())
+                    ?: false
             if (!isNormalClosed) {
-                listener?.onClosed(WebSocketCode.ABNORMAL_CLOSE.index, WebSocketCode.ABNORMAL_CLOSE.name)
+                listener?.onClosed(WebSocketCode.ABNORMAL_CLOSE.index, WebSocketCode.ABNORMAL_CLOSE.toString())
+                mOkHttpClient.dispatcher().cancelAll()
+                websocketStatus = WebSocketStatus.DISCONNECTED
+                websocket = null
             }
         }
     }

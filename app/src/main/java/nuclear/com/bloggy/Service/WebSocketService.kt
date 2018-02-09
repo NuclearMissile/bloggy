@@ -17,6 +17,7 @@ import nuclear.com.bloggy.Network.WebSocketManager.getListener
 import nuclear.com.bloggy.R
 import nuclear.com.bloggy.Settings
 import nuclear.com.bloggy.UserHolder
+import nuclear.com.bloggy.Util.LogUtil
 import nuclear.com.bloggy.Util.OkHttpUtil
 import nuclear.com.bloggy.Util.ToastUtil
 import okhttp3.Request
@@ -28,28 +29,32 @@ class WebSocketService : Service() {
 
     @SuppressLint("NewApi")
     override fun onCreate() {
-        val request = Request.Builder()
-                .url(Settings.INSTANCE.WebSocketUrl)
-                .addHeader("Authorization", OkHttpUtil.genAuthHeader(Settings.INSTANCE.AuthToken!!))
-                .build()
+        val request = Request.Builder().url(Settings.INSTANCE.WebSocketUrl).build()
         mWebSocketManager = WebSocketManager.Builder(this)
                 .autoReconnect(true)
-                .client(OkHttpUtil.genOkHttpClient(OkHttpUtil.INTERCEPTOR_LOGGING))
+                .client(OkHttpUtil.genOkHttpClient(OkHttpUtil.INTERCEPTOR_LOGGING,
+                        OkHttpUtil.getAuthInterceptor(OkHttpUtil.genAuthHeader(Settings.INSTANCE.AuthToken!!))))
                 .request(request)
                 .build()!!
         setListener()
         mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         mNotificationManager.createNotificationChannel(NotificationChannel("1", "Bloggy Service", NotificationManager.IMPORTANCE_DEFAULT))
-        val clickIntent = Intent(this, NotificationClickReceiver::class.java)
-        clickIntent.putExtra("msg_type", -1)
-        val builder = NotificationCompat.Builder(this, "1")
-                .setContentTitle("Client ${UserHolder.currUser!!.username} is online.")
-                .setContentText("WebSocket service is running.")
-                .setSmallIcon(R.drawable.logo_small)
-                .setOngoing(true)
-                .setContentIntent(PendingIntent.getBroadcast(this, 0, clickIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT))
-        /*Glide.with(this)
+        super.onCreate()
+    }
+
+    private fun setListener() {
+        mWebSocketManager.listener = getListener(onOpen = {
+            val clickIntent = Intent(this, NotificationClickReceiver::class.java)
+            clickIntent.putExtra("msg_type", -1)
+            val builder = NotificationCompat.Builder(this, "1")
+                    .setContentTitle("Client ${UserHolder.currUser!!.username} is online.")
+                    .setContentText("WebSocket service is running.")
+                    .setSmallIcon(R.drawable.logo_small)
+                    .setOngoing(true)
+                    .setContentIntent(PendingIntent.getBroadcast(this, 0, clickIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT))
+            startForeground(1, builder.build())
+            /*Glide.with(this)
                 .asBitmap()
                 .load(UserHolder.getAvatarUrl(48)!!)
                 .apply(GlideOptions.DEF_OPTION)
@@ -58,12 +63,9 @@ class WebSocketService : Service() {
                         startForeground(1, builder.setLargeIcon(resource).build())
                     }
                 })*/
-        startForeground(1, builder.build())
-        super.onCreate()
-    }
-
-    private fun setListener() {
-        mWebSocketManager.listener = getListener(onFailure = { throwable: Throwable, response: Response? ->
+        }, onClosed = { code, reason ->
+            stopSelf()
+        }, onFailure = { throwable: Throwable, response: Response? ->
             throwable.printStackTrace()
             if (Settings.INSTANCE.DebugMode)
                 ToastUtil.showLongToast(throwable.message)
@@ -116,6 +118,8 @@ class WebSocketService : Service() {
                     ToastUtil.showLongToast("Unknown message type")
                 }
             }
+        }, onStatusChanged = { oldStatus, newStatus ->
+            LogUtil.i(this, "$oldStatus -> $newStatus")
         })
     }
 
