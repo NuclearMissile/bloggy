@@ -17,7 +17,6 @@ import nuclear.com.bloggy.Network.WebSocketManager.getListener
 import nuclear.com.bloggy.R
 import nuclear.com.bloggy.Settings
 import nuclear.com.bloggy.UserHolder
-import nuclear.com.bloggy.Util.LogUtil
 import nuclear.com.bloggy.Util.OkHttpUtil
 import nuclear.com.bloggy.Util.ToastUtil
 import okhttp3.Request
@@ -118,8 +117,6 @@ class WebSocketService : Service() {
                     ToastUtil.showLongToast("Unknown message type")
                 }
             }
-        }, onStatusChanged = { oldStatus, newStatus ->
-            LogUtil.i(this, "$oldStatus -> $newStatus")
         })
     }
 

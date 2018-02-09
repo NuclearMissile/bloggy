@@ -84,6 +84,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
         private set(value) {
             if (field != value) {
                 listener?.onStatusChanged(field, value)
+                LogUtil.i(this, "$field -> $value")
                 field = value
             }
         }
@@ -98,7 +99,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
 
     companion object {
         private const val BASE_RECONNECT_INTERVAL = 1000
-        private const val MAX_RECONNECT_COUNT = 5
+        private const val MAX_RECONNECT_COUNT = 3
     }
 
     class Builder(val context: Context) {
@@ -179,7 +180,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
         websocketStatus = WebSocketStatus.RECONNECTING
         val delay = (1 shl reconnectCount) * BASE_RECONNECT_INTERVAL.toLong()
         if (reconnectCount >= MAX_RECONNECT_COUNT) {
-            LogUtil.w(this, "reach max reconnect interval, reconnect failed, count:$reconnectCount")
+            LogUtil.w(this, "reach max reconnect count, reconnect failed, count:$reconnectCount")
             disConnect()
             return
         }
@@ -198,7 +199,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
     }
 
     override fun disConnect() {
-        if (websocketStatus == WebSocketStatus.DISCONNECTED || websocket == null)
+        if (websocketStatus == WebSocketStatus.DISCONNECTED)
             return
         isManualClosed = true
         cancelReconnect()
@@ -219,7 +220,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
     override fun sendMessage(msg: String): Boolean {
         var isSend = false
         if (websocket != null && websocketStatus == WebSocketStatus.CONNECTED) {
-            isSend = websocket!!.send(msg)
+            isSend = websocket?.send(msg) ?: false
             if (!isSend)
                 tryReconnect()
         }
@@ -229,7 +230,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
     override fun sendBinaryMessage(byteString: ByteString): Boolean {
         var isSend = false
         if (websocket != null && websocketStatus == WebSocketStatus.CONNECTED) {
-            isSend = websocket!!.send(byteString)
+            isSend = websocket?.send(byteString) ?: false
             if (!isSend)
                 tryReconnect()
         }
