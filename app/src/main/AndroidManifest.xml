@@ -10,14 +10,15 @@
     <application
         android:name=".BaseApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logo_small"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/logo_small"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".UI.Activity.MainActivity"
             android:label="@string/app_name"
+            android:launchMode="singleTask"
             android:theme="@style/AppTheme.NoActionBar"
             tools:ignore="InnerclassSeparator">
             <intent-filter>
@@ -60,7 +61,14 @@
         <service
             android:name=".Service.WebSocketService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            tools:ignore="InnerclassSeparator" />
+
+        <receiver
+            android:name=".BroadcastReceiver.NotificationClickReceiver"
+            android:enabled="true"
+            android:exported="false"
+            tools:ignore="InnerclassSeparator" />
     </application>
 
 </manifest>

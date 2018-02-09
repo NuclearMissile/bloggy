@@ -1,5 +1,6 @@
 package nuclear.com.bloggy.UI.Activity
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -26,10 +27,7 @@ import nuclear.com.bloggy.UI.Fragment.BaseRVFragment
 import nuclear.com.bloggy.UI.PostContentViewBinder
 import nuclear.com.bloggy.UI.UserViewBinder
 import nuclear.com.bloggy.UI.Widget.RxSwipeBackActivity
-import nuclear.com.bloggy.Util.ShareUtil
-import nuclear.com.bloggy.Util.ToastUtil
-import nuclear.com.bloggy.Util.checkApiError
-import nuclear.com.bloggy.Util.defaultSchedulers
+import nuclear.com.bloggy.Util.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -38,11 +36,10 @@ class PostActivity : RxSwipeBackActivity() {
     private var mFavoritePost: FavoritePost? = null
         get() = BaseApplication.favoritePostBox.query()
                 .equal(FavoritePost_.postId, mPost.id.toLong())
-                .build()
-                .findFirst()
+                .build().findFirst()
 
     companion object {
-        fun tryStart(context: Context, postId: Int) {
+        fun tryStart(context: Context, postId: Int, initPageIndex: Int = 0) {
             ServiceFactory.DEF_SERVICE
                     .getPostById(postId)
                     .checkApiError()
@@ -50,6 +47,9 @@ class PostActivity : RxSwipeBackActivity() {
                     .subscribeBy(onNext = {
                         val intent = Intent(context, PostActivity::class.java)
                         intent.putExtra("post", it.result)
+                        intent.putExtra("initPageIndex", initPageIndex)
+                        if (context !is Activity)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(intent)
                     }, onError = {
                         handleError(this, it)
@@ -65,7 +65,7 @@ class PostActivity : RxSwipeBackActivity() {
         supportActionBar?.setTitle(R.string.post)
         fab_post.setOnClickListener { onFabClick() }
         mPost = intent.getParcelableExtra("post")!!
-        initViewPager()
+        initViewPager(intent.getIntExtra("initPageIndex", 0))
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -109,8 +109,7 @@ class PostActivity : RxSwipeBackActivity() {
                                     }, onError = {
                                         handleError(this, it)
                                     })
-                        })
-                        .show()
+                        }).show()
             }
         }
     }
@@ -136,7 +135,7 @@ class PostActivity : RxSwipeBackActivity() {
                 })
     }
 
-    private fun initViewPager() {
+    private fun initViewPager(initPageIndex: Int = 0) {
         view_pager_post.adapter = object : FragmentPagerAdapter(supportFragmentManager) {
             override fun getItem(position: Int): Fragment {
                 val bundle = Bundle()
@@ -179,6 +178,10 @@ class PostActivity : RxSwipeBackActivity() {
                 }
             }
         })
+        if (initPageIndex > 0 && initPageIndex < view_pager_post.adapter!!.count)
+            view_pager_post.currentItem = initPageIndex
+        else
+            LogUtil.w(this, "Invalid init page index: $initPageIndex")
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {

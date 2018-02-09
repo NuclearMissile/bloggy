@@ -69,8 +69,6 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
             websocket = null
         }
     }
-    private var isManualClosed = false
-    private var reconnectCount = 0
     private var mContext: Context
     private var mOkHttpClient: OkHttpClient
     private var mRequest: Request
@@ -78,15 +76,24 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
     var listener: IWebSocketManagerListener? = null
     var websocketStatus = WebSocketStatus.DISCONNECTED
         @Synchronized
-        private set
+        private set(value) {
+            if (field != value) {
+                listener?.onStatusChanged(field, value)
+                field = value
+            }
+        }
     var websocket: WebSocket? = null
         private set
     var isAutoReconnect: Boolean = true
         private set
+    var isManualClosed = false
+        private set
+    var reconnectCount = 0
+        private set
 
     companion object {
-        private const val BASE_RECONNECT_INTERVAL = 2000
-        private const val MAX_RECONNECT_INTERVAL = 128 * BASE_RECONNECT_INTERVAL
+        private const val BASE_RECONNECT_INTERVAL = 1000
+        private const val MAX_RECONNECT_COUNT = 8
     }
 
     class Builder(val context: Context) {
@@ -132,14 +139,14 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
 
     @Synchronized
     private fun initConnect() {
+        if (websocketStatus == WebSocketStatus.CONNECTING || websocketStatus == WebSocketStatus.CONNECTED) {
+            LogUtil.w(this, "WebSocket is ${websocketStatus.name}")
+            return
+        }
         if (!NetworkUtil.isConnected(mContext)) {
             websocketStatus = WebSocketStatus.DISCONNECTED
             websocket = null
             LogUtil.w(this, "WebSocket connect failed: Network not available.")
-            return
-        }
-        if (websocketStatus == WebSocketStatus.CONNECTING || websocketStatus == WebSocketStatus.CONNECTED) {
-            LogUtil.w(this, "WebSocket is ${websocketStatus.name}")
             return
         }
         websocketStatus = WebSocketStatus.CONNECTING
@@ -166,7 +173,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
         }
         websocketStatus = WebSocketStatus.RECONNECTING
         val delay = (1 shl reconnectCount) * BASE_RECONNECT_INTERVAL.toLong()
-        if (delay > MAX_RECONNECT_INTERVAL) {
+        if (reconnectCount > MAX_RECONNECT_COUNT) {
             disConnect()
             LogUtil.e(this, "reach max reconnect interval, reconnect failed, count:$reconnectCount")
             return

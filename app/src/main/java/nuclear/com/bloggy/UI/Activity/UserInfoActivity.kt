@@ -1,5 +1,6 @@
 package nuclear.com.bloggy.UI.Activity
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -43,6 +44,8 @@ class UserInfoActivity : RxSwipeBackActivity() {
             } else {
                 val intent = Intent(context, UserInfoActivity::class.java)
                 intent.putExtra("id", id)
+                if (context !is Activity)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
             }
         }

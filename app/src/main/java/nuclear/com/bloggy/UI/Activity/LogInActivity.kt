@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -39,6 +40,8 @@ class LogInActivity : RxSwipeBackActivity() {
         fun tryStart(context: Context) {
             if (UserHolder.isAnonymous) {
                 val intent = Intent(context, LogInActivity::class.java)
+                if (context !is Activity)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
             }
         }

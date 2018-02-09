@@ -1,5 +1,6 @@
 package nuclear.com.bloggy.UI.Activity
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -23,7 +24,10 @@ import nuclear.com.swipeback.activity.SwipeBackActivityHelper
 class AboutActivity : AbsAboutActivity(), ISwipeBackActivity {
     companion object {
         fun tryStart(context: Context) {
-            context.startActivity(Intent(context, AboutActivity::class.java))
+            val intent = Intent(context, AboutActivity::class.java)
+            if (context !is Activity)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
         }
     }
 

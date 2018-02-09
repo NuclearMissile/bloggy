@@ -17,15 +17,23 @@ interface IWebSocketManagerListener {
     fun onClosed(code: Int, reason: String)
 
     fun onFailure(throwable: Throwable, response: Response?)
+
+    fun onStatusChanged(oldStatus: WebSocketStatus, newStatus: WebSocketStatus)
 }
 
-fun genListener(onOpen: ((response: Response) -> Unit)? = null,
+fun getListener(onOpen: ((response: Response) -> Unit)? = null,
                 onMessage: ((message: String) -> Unit)? = null,
                 onBinaryMessage: ((byteString: ByteString) -> Unit)? = null,
                 onReconnect: (() -> Unit)? = null,
                 onClosing: ((code: Int, reason: String) -> Unit)? = null,
                 onClosed: ((code: Int, reason: String) -> Unit)? = null,
-                onFailure: ((throwable: Throwable, response: Response?) -> Unit)? = null) = object : IWebSocketManagerListener {
+                onFailure: ((throwable: Throwable, response: Response?) -> Unit)? = null,
+                onStatusChanged: ((oldStatus: WebSocketStatus, newStatus: WebSocketStatus) -> Unit)? = null) = object : IWebSocketManagerListener {
+
+    override fun onStatusChanged(oldStatus: WebSocketStatus, newStatus: WebSocketStatus) {
+        onStatusChanged?.invoke(oldStatus, newStatus)
+    }
+
     override fun onOpen(response: Response) {
         onOpen?.invoke(response)
     }

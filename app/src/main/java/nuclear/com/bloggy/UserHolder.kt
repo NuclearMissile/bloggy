@@ -56,7 +56,6 @@ object UserHolder {
         refreshToken(authHeaderByPassword, BaseApplication.INSTANCE::startWSService)
     }
 
-    @Synchronized
     fun resume() {
         Settings.INSTANCE.Password ?: return
         currUser = Settings.INSTANCE.SavedUser

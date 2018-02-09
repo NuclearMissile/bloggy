@@ -1,5 +1,6 @@
 package nuclear.com.bloggy.UI.Activity
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -40,6 +41,8 @@ class EditPostActivity : RxSwipeBackActivity() {
                 return
             }
             val intent = Intent(context, EditPostActivity::class.java)
+            if (context !is Activity)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
 
@@ -50,6 +53,8 @@ class EditPostActivity : RxSwipeBackActivity() {
             }
             val intent = Intent(context, EditPostActivity::class.java)
             intent.putExtra("imported", imported)
+            if (context !is Activity)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
 
@@ -66,6 +71,8 @@ class EditPostActivity : RxSwipeBackActivity() {
                         } else {
                             val intent = Intent(context, EditPostActivity::class.java)
                             intent.putExtra("oldPost", it.result)
+                            if (context !is Activity)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             context.startActivity(intent)
                         }
                     }, onError = {

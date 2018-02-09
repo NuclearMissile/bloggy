@@ -1,6 +1,9 @@
 package nuclear.com.bloggy
 
+import android.app.Activity
+import android.app.ActivityManager
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.os.Environment
 import io.objectbox.Box
@@ -9,8 +12,8 @@ import nuclear.com.bloggy.Entity.REST.FavoritePost
 import nuclear.com.bloggy.Entity.REST.MyObjectBox
 import nuclear.com.bloggy.Entity.REST.NewArticle
 import nuclear.com.bloggy.Service.WebSocketService
-import nuclear.com.bloggy.Util.LogUtil
 import java.io.File
+
 
 class BaseApplication : Application() {
     companion object {
@@ -22,6 +25,26 @@ class BaseApplication : Application() {
             private set
         lateinit var draftBox: Box<NewArticle>
             private set
+
+        fun openFromBackground(context: Context) {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val list = am.getRunningTasks(100)
+            if (!list.isEmpty() && list[0].topActivity.packageName == context.packageName) {
+                return
+            }
+            list.forEach {
+                if (it.topActivity.packageName == context.packageName) {
+                    val intent = Intent()
+                    intent.component = it.topActivity
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    if (context !is Activity)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(intent)
+                    return
+                }
+            }
+            context.startActivity(context.packageManager.getLaunchIntentForPackage(context.packageName))
+        }
     }
 
     fun startWSService() {
