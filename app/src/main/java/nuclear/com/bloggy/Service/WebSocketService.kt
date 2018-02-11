@@ -65,6 +65,9 @@ class WebSocketService : Service() {
                         startForeground(1, builder.setLargeIcon(resource).build())
                     }
                 })*/
+        }, onReconnect = {
+            if (Settings.INSTANCE.DebugMode)
+                ToastUtil.showShortToast("reconnecting")
         }, onClosed = { code, reason ->
             stopSelf()
         }, onFailure = { throwable: Throwable, response: Response? ->

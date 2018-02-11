@@ -99,7 +99,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
 
     companion object {
         private const val BASE_RECONNECT_INTERVAL = 1000
-        private const val MAX_RECONNECT_COUNT = 3
+        private const val MAX_RECONNECT_COUNT = 5
     }
 
     class Builder(val context: Context) {

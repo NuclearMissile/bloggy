@@ -56,6 +56,7 @@ object UserHolder {
         refreshToken(authHeaderByPassword, BaseApplication.INSTANCE::startWSService)
     }
 
+    @Synchronized
     fun resume() {
         Settings.INSTANCE.Password ?: return
         currUser = Settings.INSTANCE.SavedUser
@@ -104,7 +105,7 @@ object UserHolder {
         }
         ServiceFactory.DEF_SERVICE.getToken(authHeader)
                 .checkApiError()
-                .allIOSchedulers()
+                .defaultSchedulers()
                 .subscribeBy(onNext = {
                     Settings.INSTANCE.AuthToken = it.result.token
                     Settings.INSTANCE.TokenExpireAt = it.result.expireAt
