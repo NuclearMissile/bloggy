@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationCompat
 import com.google.gson.Gson
 import nuclear.com.bloggy.BroadcastReceiver.NotificationClickReceiver
 import nuclear.com.bloggy.Entity.WebSocket.*
+import nuclear.com.bloggy.Network.WebSocketManager.IWebSocketManager
 import nuclear.com.bloggy.Network.WebSocketManager.WebSocketManager
 import nuclear.com.bloggy.Network.WebSocketManager.getListener
 import nuclear.com.bloggy.R
@@ -23,7 +24,7 @@ import okhttp3.Request
 import okhttp3.Response
 
 class WebSocketService : Service() {
-    private lateinit var mWebSocketManager: WebSocketManager
+    private lateinit var mWebSocketManager: IWebSocketManager
     private lateinit var mNotificationManager: NotificationManager
 
     override fun onCreate() {

@@ -78,7 +78,7 @@ class WebSocketManager private constructor(builder: Builder) : IWebSocketManager
     private var mOkHttpClient: OkHttpClient
     private var mRequest: Request
 
-    var listener: IWebSocketManagerListener? = null
+    override var listener: IWebSocketManagerListener? = null
     var websocketStatus = WebSocketStatus.DISCONNECTED
         @Synchronized
         private set(value) {

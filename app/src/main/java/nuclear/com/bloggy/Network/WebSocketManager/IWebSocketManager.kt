@@ -4,6 +4,8 @@ import okhttp3.WebSocket
 import okio.ByteString
 
 interface IWebSocketManager {
+    var listener: IWebSocketManagerListener?
+
     fun getWebSocket(): WebSocket?
 
     fun connect()
